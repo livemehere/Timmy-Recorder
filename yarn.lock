@@ -456,6 +456,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lukeed/csprng@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@lukeed/csprng@npm:1.1.0"
+  checksum: 10c0/5d6dcf478af732972083ab2889c294b57f1028fa13c2c240d7a4aaa079c2c75df7ef0dcbdda5419147fc6704b4adf96b2de92f1a9a72ac21c6350c4014fffe6c
+  languageName: node
+  linkType: hard
+
 "@malept/cross-spawn-promise@npm:^1.1.0":
   version: 1.1.1
   resolution: "@malept/cross-spawn-promise@npm:1.1.1"
@@ -516,6 +523,13 @@ __metadata:
   peerDependencies:
     react: ^18.2.0
   checksum: 10c0/5fb96b46145f0f1fbbe2a4934ce26e374e59dfc4b0d7b1f0b96e4d9a93997315bb57e5d2747331648e33280669404555a52b0e9857bb8b81b1121fe02eede5ac
+  languageName: node
+  linkType: hard
+
+"@msgpack/msgpack@npm:^2.7.1":
+  version: 2.8.0
+  resolution: "@msgpack/msgpack@npm:2.8.0"
+  checksum: 10c0/5964ed3daad9ccf314238da81c91152dc693bca167b2469445c1d3ce0495443612e543d052281061a91ec48ed44a6a49dd3a334b5d0dbe2dc2db6ea6143e5787
   languageName: node
   linkType: hard
 
@@ -1035,6 +1049,8 @@ __metadata:
     framer-motion: "npm:^11.0.20"
     jotai: "npm:^2.8.4"
     jotai-devtools: "npm:^0.10.0"
+    obs-studio-node: ./static/obs-studio-node-0.3.21-Darwin.tar.gz
+    obs-websocket-js: "npm:^5.0.5"
     postcss: "npm:^8.4.38"
     prettier: "npm:^3.2.5"
     prettier-plugin-tailwindcss: "npm:^0.5.12"
@@ -1047,6 +1063,7 @@ __metadata:
     tailwind-merge: "npm:^2.4.0"
     tailwindcss: "npm:^3.4.1"
     typescript: "npm:^5.4.3"
+    uid: "npm:^2.0.2"
     vite: "npm:^5.2.4"
   languageName: unknown
   linkType: soft
@@ -1921,6 +1938,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"crypto-js@npm:^4.1.1":
+  version: 4.2.0
+  resolution: "crypto-js@npm:4.2.0"
+  checksum: 10c0/8fbdf9d56f47aea0794ab87b0eb9833baf80b01a7c5c1b0edc7faf25f662fb69ab18dc2199e2afcac54670ff0cd9607a9045a3f7a80336cccd18d77a55b9fdf0
+  languageName: node
+  linkType: hard
+
 "cssesc@npm:^3.0.0":
   version: 3.0.0
   resolution: "cssesc@npm:3.0.0"
@@ -2677,6 +2701,13 @@ __metadata:
   version: 2.0.3
   resolution: "esutils@npm:2.0.3"
   checksum: 10c0/9a2fe69a41bfdade834ba7c42de4723c97ec776e40656919c62cbd13607c45e127a003f05f724a1ea55e5029a4cf2de444b13009f2af71271e42d93a637137c7
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "eventemitter3@npm:5.0.1"
+  checksum: 10c0/4ba5c00c506e6c786b4d6262cfbce90ddc14c10d4667e5c83ae993c9de88aa856033994dd2b35b83e8dc1170e224e66a319fa80adc4c32adcd2379bbc75da814
   languageName: node
   linkType: hard
 
@@ -3746,6 +3777,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"isomorphic-ws@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "isomorphic-ws@npm:5.0.0"
+  peerDependencies:
+    ws: "*"
+  checksum: 10c0/a058ac8b5e6efe9e46252cb0bc67fd325005d7216451d1a51238bc62d7da8486f828ef017df54ddf742e0fffcbe4b1bcc2a66cc115b027ed0180334cd18df252
+  languageName: node
+  linkType: hard
+
 "iterator.prototype@npm:^1.1.2":
   version: 1.1.2
   resolution: "iterator.prototype@npm:1.1.2"
@@ -4531,6 +4571,28 @@ __metadata:
     define-properties: "npm:^1.2.1"
     es-object-atoms: "npm:^1.0.0"
   checksum: 10c0/15809dc40fd6c5529501324fec5ff08570b7d70fb5ebbe8e2b3901afec35cf2b3dc484d1210c6c642cd3e7e0a5e18dd1d6850115337fef46bdae14ab0cb18ac3
+  languageName: node
+  linkType: hard
+
+"obs-studio-node@file:./static/obs-studio-node-0.3.21-Darwin.tar.gz::locator=Timmy-Recoder%40workspace%3A.":
+  version: 0.3.99
+  resolution: "obs-studio-node@file:./static/obs-studio-node-0.3.21-Darwin.tar.gz#./static/obs-studio-node-0.3.21-Darwin.tar.gz::hash=09a198&locator=Timmy-Recoder%40workspace%3A."
+  checksum: 10c0/a8089fc23a9465daefbe5c284a7fe54196e3b9cb31c3e8721100ce702311fc2a93a23f0f003e4d8670baec89dca31a349bbd757820422d1ae9afd7e8dc3070d2
+  languageName: node
+  linkType: hard
+
+"obs-websocket-js@npm:^5.0.5":
+  version: 5.0.5
+  resolution: "obs-websocket-js@npm:5.0.5"
+  dependencies:
+    "@msgpack/msgpack": "npm:^2.7.1"
+    crypto-js: "npm:^4.1.1"
+    debug: "npm:^4.3.2"
+    eventemitter3: "npm:^5.0.1"
+    isomorphic-ws: "npm:^5.0.0"
+    type-fest: "npm:^3.11.0"
+    ws: "npm:^8.13.0"
+  checksum: 10c0/3dd4c4ac3580686fe3981bfc0f7aa1d7e0c1235949d73ab6f3317a11d5b209cd54a5b534b639d49edfadebbf30c3ed377fa3251d65cab4089fdf3e29edfa2270
   languageName: node
   linkType: hard
 
@@ -6060,6 +6122,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"type-fest@npm:^3.11.0":
+  version: 3.13.1
+  resolution: "type-fest@npm:3.13.1"
+  checksum: 10c0/547d22186f73a8c04590b70dcf63baff390078c75ea8acd366bbd510fd0646e348bd1970e47ecf795b7cff0b41d26e9c475c1fedd6ef5c45c82075fbf916b629
+  languageName: node
+  linkType: hard
+
 "type-fest@npm:^4.12.0":
   version: 4.20.1
   resolution: "type-fest@npm:4.20.1"
@@ -6136,6 +6205,15 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/6e51f8b7e6ec55b897b9e56b67e864fe8f44e30f4a14357aad5dc0f7432db2f01efc0522df0b6c36d361c51f2dc3dcac5c832efd96a404cfabf884e915d38828
+  languageName: node
+  linkType: hard
+
+"uid@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "uid@npm:2.0.2"
+  dependencies:
+    "@lukeed/csprng": "npm:^1.0.0"
+  checksum: 10c0/e9d02d0562c74e74b5a2519e586db9d7f8204978e476cddd191ee1a9efb85efafdbab2dbf3fc3dde0f5da01fd9da161f37d604dabf513447fd2c03d008f1324c
   languageName: node
   linkType: hard
 
@@ -6461,6 +6539,21 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 10c0/56fece1a4018c6a6c8e28fbc88c87e0fbf4ea8fd64fc6c63b18f4acc4bd13e0ad2515189786dd2c30d3eec9663d70f4ecf699330002f8ccb547e4a18231fc9f0
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.13.0":
+  version: 8.18.0
+  resolution: "ws@npm:8.18.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/25eb33aff17edcb90721ed6b0eb250976328533ad3cd1a28a274bd263682e7296a6591ff1436d6cbc50fa67463158b062f9d1122013b361cec99a05f84680e06
   languageName: node
   linkType: hard
 

@@ -43,12 +43,15 @@
     "framer-motion": "^11.0.20",
     "jotai": "^2.8.4",
     "jotai-devtools": "^0.10.0",
+    "obs-studio-node": "./static/obs-studio-node-0.3.21-Darwin.tar.gz",
+    "obs-websocket-js": "^5.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "sass": "^1.72.0",
     "simple-tooltip-react": "^1.1.2",
-    "tailwind-merge": "^2.4.0"
+    "tailwind-merge": "^2.4.0",
+    "uid": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

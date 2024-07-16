@@ -1,8 +1,10 @@
-# Electron-React-Template
+# Timmy-Recorder
 
-바로 build 해서 앱 다운로드 가능한 상태의 템플릿.
+## obs-studio-node
 
-## 프로젝트 시작전 수정사항
+- [docs](https://github.com/hrueger/obs-studio-node-docs/blob/main/docs/index.md);
+- 
 
-- [ ] `package.json` 의 `name`, `version`, `description`, `author`, `index.html` 등등 네이밍 부분만 수정
-- [ ] `icons/*` 하위에 아이콘 교체하기
+```bash
+"obs-studio-node": "https://s3-us-west-2.amazonaws.com/obsstudionodes3.streamlabs.com/osn-0.15.6-release-win64.tar.gz"
+```

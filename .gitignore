@@ -5,3 +5,6 @@ release
 
 .yarn
 yarn-error.log
+
+static
+osn-data

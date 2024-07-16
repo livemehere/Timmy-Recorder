@@ -3,10 +3,12 @@ import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
 import { settings } from '@main/Settings';
+import { ObsManager } from '@main/utils/osn';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
   mainWindow: MainWindow | null = null;
+  osnManager = new ObsManager({ debug: true });
 
   async start() {
     /* 하드웨어 가속 끄면 확실히 성능 안잡아먹음 (대신 앱이 빡셀때 버벅임) */
@@ -15,6 +17,7 @@ class Main {
     this.appSettings();
     await this.createMainWindow();
     this.handleInvoke();
+    this.osnManager.init();
   }
 
   appSettings() {
@@ -44,7 +47,12 @@ class Main {
     app.on('window-all-closed', () => {
       if (process.platform !== 'darwin') {
         app.quit();
+        this.osnManager.shutdown();
       }
+    });
+
+    app.on('before-quit', () => {
+      this.osnManager.shutdown();
     });
   }
 
@@ -137,6 +145,7 @@ class Main {
   }
 }
 
-new Main().start().catch((e) => {
+const main = new Main();
+main.start().catch((e) => {
   console.error('Error starting Main: ', e);
 });
