@@ -1,11 +1,11 @@
 {
-  "name": "livemehere-electron-app-project-name",
-  "description": "livemehere-electron-app-description",
+  "name": "Timmy-Recoder",
+  "description": "Recording App for Windows and macOS",
   "version": "1.0.0",
   "author": "livemehere",
   "build": {
-    "productName": "product-name",
-    "appId": "com.livemehere.${name}",
+    "productName": "Timmy-Recoder",
+    "appId": "com.livemehere.Timmy-Recoder",
     "files": [
       "dist/**/*"
     ],

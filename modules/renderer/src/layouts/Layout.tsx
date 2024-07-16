@@ -16,7 +16,7 @@ const Layout: FC<Props> = ({ children }) => {
   return (
     <>
       <nav id="window-handle">
-        <p>Livemehere App</p>
+        <p>Timmy Recorder</p>
       </nav>
       <main>{children}</main>
     </>

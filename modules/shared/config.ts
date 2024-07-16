@@ -1,1 +1,1 @@
-export const DEEP_LINK_PROTOCOL = 'livemehere-app';
+export const DEEP_LINK_PROTOCOL = 'timmy-recorder';

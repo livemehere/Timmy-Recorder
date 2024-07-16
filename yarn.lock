@@ -1011,6 +1011,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"Timmy-Recoder@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "Timmy-Recoder@workspace:."
+  dependencies:
+    "@types/node": "npm:^20.11.30"
+    "@types/react": "npm:^18.2.69"
+    "@types/react-dom": "npm:^18.2.22"
+    "@typescript-eslint/eslint-plugin": "npm:^7.3.1"
+    "@typescript-eslint/parser": "npm:^7.3.1"
+    async-modal-react: "npm:^2.1.7"
+    autoprefixer: "npm:^10.4.19"
+    axios: "npm:^1.6.8"
+    chalk: "npm:^5.3.0"
+    clsx: "npm:^2.1.1"
+    cross-env: "npm:^7.0.3"
+    electron: "npm:^29.1.5"
+    electron-builder: "npm:^24.13.3"
+    electron-devtools-installer: "npm:^3.2.0"
+    eslint: "npm:^8.57.0"
+    eslint-plugin-react: "npm:^7.34.1"
+    eslint-plugin-unused-imports: "npm:^3.1.0"
+    framer-motion: "npm:^11.0.20"
+    jotai: "npm:^2.8.4"
+    jotai-devtools: "npm:^0.10.0"
+    postcss: "npm:^8.4.38"
+    prettier: "npm:^3.2.5"
+    prettier-plugin-tailwindcss: "npm:^0.5.12"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-router-dom: "npm:^6.22.3"
+    rimraf: "npm:^5.0.5"
+    sass: "npm:^1.72.0"
+    simple-tooltip-react: "npm:^1.1.2"
+    tailwind-merge: "npm:^2.4.0"
+    tailwindcss: "npm:^3.4.1"
+    typescript: "npm:^5.4.3"
+    vite: "npm:^5.2.4"
+  languageName: unknown
+  linkType: soft
+
 "abbrev@npm:^2.0.0":
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
@@ -3989,46 +4029,6 @@ __metadata:
   checksum: 10c0/3da6ee62d4cd9f03f5dc90b4df2540fb85b352081bee77fe4bbcd12c9000ead7f35e0a38b8d09a9bb99b13223446dd8689ff3c4959807620726d788701a83d2d
   languageName: node
   linkType: hard
-
-"livemehere-electron-app-project-name@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "livemehere-electron-app-project-name@workspace:."
-  dependencies:
-    "@types/node": "npm:^20.11.30"
-    "@types/react": "npm:^18.2.69"
-    "@types/react-dom": "npm:^18.2.22"
-    "@typescript-eslint/eslint-plugin": "npm:^7.3.1"
-    "@typescript-eslint/parser": "npm:^7.3.1"
-    async-modal-react: "npm:^2.1.7"
-    autoprefixer: "npm:^10.4.19"
-    axios: "npm:^1.6.8"
-    chalk: "npm:^5.3.0"
-    clsx: "npm:^2.1.1"
-    cross-env: "npm:^7.0.3"
-    electron: "npm:^29.1.5"
-    electron-builder: "npm:^24.13.3"
-    electron-devtools-installer: "npm:^3.2.0"
-    eslint: "npm:^8.57.0"
-    eslint-plugin-react: "npm:^7.34.1"
-    eslint-plugin-unused-imports: "npm:^3.1.0"
-    framer-motion: "npm:^11.0.20"
-    jotai: "npm:^2.8.4"
-    jotai-devtools: "npm:^0.10.0"
-    postcss: "npm:^8.4.38"
-    prettier: "npm:^3.2.5"
-    prettier-plugin-tailwindcss: "npm:^0.5.12"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-router-dom: "npm:^6.22.3"
-    rimraf: "npm:^5.0.5"
-    sass: "npm:^1.72.0"
-    simple-tooltip-react: "npm:^1.1.2"
-    tailwind-merge: "npm:^2.4.0"
-    tailwindcss: "npm:^3.4.1"
-    typescript: "npm:^5.4.3"
-    vite: "npm:^5.2.4"
-  languageName: unknown
-  linkType: soft
 
 "locate-path@npm:^6.0.0":
   version: 6.0.0

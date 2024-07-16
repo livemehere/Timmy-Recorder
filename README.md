@@ -4,5 +4,5 @@
 
 ## 프로젝트 시작전 수정사항
 
-- [ ] `package.json` 의 `name`, `version`, `description`, `author` 등등 네이밍 부분만 수정
+- [ ] `package.json` 의 `name`, `version`, `description`, `author`, `index.html` 등등 네이밍 부분만 수정
 - [ ] `icons/*` 하위에 아이콘 교체하기
