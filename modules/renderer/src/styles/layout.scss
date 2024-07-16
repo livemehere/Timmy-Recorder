@@ -1,0 +1,9 @@
+#window-handle {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height:var(--window-handle-height);
+  @apply bg-neutral-900;
+}

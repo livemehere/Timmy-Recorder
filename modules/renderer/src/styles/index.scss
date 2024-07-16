@@ -1,0 +1,11 @@
+@import './tailwind';
+@import './modal';
+@import './layout';
+
+:root {
+  --window-handle-height: 32px;
+}
+
+body {
+  @apply bg-neutral-950 text-neutral-100;
+}

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "paths": {
+      "@main/*": ["./modules/main/*"],
+      "@renderer/*": ["./modules/renderer/*"],
+      "@preload/*": ["./modules/preload/*"],
+      "@shared/*": ["./modules/shared/*"]
+    }
+  },
+  "include": [
+    "modules/**/*",
+    "typings/**/*",
+  ]
+}
+

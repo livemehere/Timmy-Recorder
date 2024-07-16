@@ -1,0 +1,76 @@
+{
+  "name": "livemehere-electron-app-project-name",
+  "description": "livemehere-electron-app-description",
+  "version": "1.0.0",
+  "author": "livemehere",
+  "build": {
+    "productName": "product-name",
+    "appId": "com.livemehere.${name}",
+    "files": [
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release/${version}"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icons/icon.icns",
+      "artifactName": "${productName}-${version}-${os}.${ext}"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icons/icon.ico",
+      "artifactName": "${productName}-${version}-${os}.${ext}"
+    }
+  },
+  "main": "dist/main.js",
+  "npmClient": "yarn",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "cross-env NODE_ENV=production node scripts/build.mjs",
+    "build:mac-arm64": "cross-env BUILD_TARGET=mac-arm64 yarn build",
+    "build:mac-x64": "cross-env BUILD_TARGET=mac-x64 yarn build",
+    "build:win-x64": "cross-env BUILD_TARGET=win-x64 yarn build",
+    "dev": "cross-env NODE_ENV=development VITE_DEBUG=1 node scripts/dev.mjs",
+    "preview": "cross-env NODE_ENV=production VITE_DEBUG=1 electron .",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "async-modal-react": "^2.1.7",
+    "axios": "^1.6.8",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.0.20",
+    "jotai": "^2.8.4",
+    "jotai-devtools": "^0.10.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "sass": "^1.72.0",
+    "simple-tooltip-react": "^1.1.2",
+    "tailwind-merge": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.69",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "autoprefixer": "^10.4.19",
+    "chalk": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3",
+    "electron-devtools-installer": "^3.2.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-unused-imports": "^3.1.0",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.12",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.3",
+    "vite": "^5.2.4"
+  }
+}
