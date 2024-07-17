@@ -44,7 +44,7 @@
     "framer-motion": "^11.0.20",
     "jotai": "^2.8.4",
     "jotai-devtools": "^0.10.0",
-    "obs-studio-node": "./static/osn-0.15.6-release-win64.tar.gz",
+    "obs-studio-node": "./static/iojs-v2.0.8-signed.tar.gz",
     "obs-websocket-js": "^5.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

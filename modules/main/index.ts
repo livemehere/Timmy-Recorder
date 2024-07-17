@@ -189,6 +189,11 @@ class Main {
     ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]['value']) => {
       this.osnManager.setBitrate(bitrate);
     });
+
+    // get window list
+    ipcMain.handle('osn:getWindowList', async () => {
+      return this.osnManager.getWindowList();
+    });
   }
 }
 

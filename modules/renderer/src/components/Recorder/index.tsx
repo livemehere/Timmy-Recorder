@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import useInvoke from '@renderer/src/hooks/useInvoke';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
-import { MonitorInfo } from '@shared/shared-type';
+import { MonitorInfo, WindowInfo } from '@shared/shared-type';
 import { VIDEO_BIT_RATES } from '@shared/shared-const';
 
 type Props = {};
@@ -11,6 +11,7 @@ export default function Recorder({}: Props) {
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
   const [selectedFPS, setSelectedFPS] = useState<number | null>(null);
   const [selectedBitRate, setSelectedBitRate] = useState<(typeof VIDEO_BIT_RATES)[number] | null>(null);
+  const [selectedWindow, setSelectedWindow] = useState<WindowInfo | null>(null);
   const { data: formats } = useInvoke<string[]>('osn:formatValues', true, (formats) => {
     setSelectedFormat(formats[0]);
   });
@@ -23,6 +24,10 @@ export default function Recorder({}: Props) {
 
   const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>('osn:getBitrateValues', true, (bitRateValues) => {
     setSelectedBitRate(bitRateValues[0]);
+  });
+
+  const { data: windowList } = useInvoke<WindowInfo[]>('osn:getWindowList', true, (windowList) => {
+    setSelectedWindow(windowList[0]);
   });
 
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
@@ -113,6 +118,23 @@ export default function Recorder({}: Props) {
               {monitorList?.map((monitor) => (
                 <ListboxOption key={monitor.monitorIndex} value={monitor} className={'cursor-pointer'}>
                   {monitor.label}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </Listbox>
+        <Listbox
+          value={selectedWindow}
+          onChange={(value) => {
+            setSelectedWindow(value);
+            invokeUpdateScene({ captureType: 'window_capture', windowInfo: value });
+          }}>
+          <div className={'flex flex-col gap-2'}>
+            <ListboxButton>{selectedWindow?.name}</ListboxButton>
+            <ListboxOptions>
+              {windowList?.map((window) => (
+                <ListboxOption key={window.value} value={window} className={'cursor-pointer'}>
+                  {window.name}
                 </ListboxOption>
               ))}
             </ListboxOptions>

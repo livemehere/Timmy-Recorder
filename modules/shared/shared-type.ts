@@ -1,7 +1,12 @@
-export interface SceneOption {
-  captureType: 'monitor_capture' | 'window_capture';
-  monitorInfo: MonitorInfo;
-}
+export type SceneOption =
+  | {
+      captureType: 'monitor_capture';
+      monitorInfo: MonitorInfo;
+    }
+  | {
+      captureType: 'window_capture';
+      windowInfo: WindowInfo;
+    };
 
 export interface MonitorInfo {
   monitorIndex: number;
@@ -12,4 +17,10 @@ export interface MonitorInfo {
   physicalHeight: number;
   scaleFactor: number;
   aspectRatio: number;
+}
+
+export interface WindowInfo {
+  name: string;
+  value: string;
+  enabled: boolean;
 }

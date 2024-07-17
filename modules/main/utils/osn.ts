@@ -1,10 +1,10 @@
 import * as osn from 'obs-studio-node';
 import path from 'path';
-import electron, { app, screen } from 'electron';
+import { app, screen, desktopCapturer } from 'electron';
 import { uid } from 'uid';
 import { byOS, isMac, OS } from '@main/utils/byOS';
 import debugLog from '@shared/debugLog';
-import { MonitorInfo, SceneOption } from '@shared/shared-type';
+import { MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 
 const HOST_NAME = 'Obj-Manager-Host';
@@ -37,6 +37,8 @@ export class ObsManager {
     osn.NodeObs.SetWorkingDirectory(this.obsStudioNodePkgPath);
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
 
+    this.getWindowList();
+
     if (apiInitRes !== 0) {
       this.shutdown();
       throw new Error('Failed to initialize OBS');
@@ -53,6 +55,7 @@ export class ObsManager {
     this.setSetting('Video', 'FPSCommon', FPS_VALUES[0]);
 
     const defaultMonitor = this.getMonitorList()[0];
+
     this.updateScene({
       captureType: 'monitor_capture',
       monitorInfo: defaultMonitor
@@ -158,6 +161,13 @@ export class ObsManager {
     });
   }
 
+  async getWindowList(): Promise<WindowInfo[]> {
+    const videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'window_capture', [OS.Mac]: 'window_capture' }), 'desktop-video', {});
+    // @ts-ignore
+    const _windows = videoSource.properties.get('window').details.items as WindowInfo[];
+    return _windows;
+  }
+
   setupScene(option: SceneOption) {
     let videoSource: osn.IInput;
     if (option.captureType === 'monitor_capture') {
@@ -185,11 +195,35 @@ export class ObsManager {
       const sceneItem = scene.add(videoSource);
       sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
       return scene;
+    } else if (option.captureType === 'window_capture') {
+      debugLog('윈도우를 캡쳐합니다');
+      console.log(option);
+      videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'window_capture', [OS.Mac]: 'window_capture' }), 'window-video', {});
+      const settings = videoSource.settings;
+      settings['window'] = option.windowInfo.value;
+      videoSource.update(settings);
+      videoSource.save();
+
+      const outputWidth = videoSource.width;
+      const outputHeight = videoSource.height;
+      const videoScaleFactor = 1.0;
+      // this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
+      // this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
+
+      const scene = osn.SceneFactory.create('test-scene');
+      const sceneItem = scene.add(videoSource);
+      // sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
+
+      const s = scene.getItems()[0];
+      console.log(s.source.name);
+      console.log('bounds', s.bounds);
+      console.log('position', s.position);
+      console.log('visible', s.visible);
+      console.log('width,height', s.source.width, s.source.height);
+
+      return scene;
     }
-
-    // TODO: window_capture 구현하기
-
-    throw new Error(`지원하지 않는 captureType입니다. (${option.captureType}은 지원하지 않습니다.)`);
+    throw new Error(`지원하지 않는 captureType입니다. (${option}은 지원하지 않습니다.)`);
   }
 
   setupSources(scene: osn.IScene) {
