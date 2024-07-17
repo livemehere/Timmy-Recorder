@@ -3,7 +3,7 @@ import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
 import { settings } from '@main/Settings';
-import { ObsManager, VIDEO_FORMATS } from '@main/utils/osn';
+import { FPS_VALUES, ObsManager, VIDEO_FORMATS } from '@main/utils/osn';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -158,6 +158,14 @@ class Main {
 
     ipcMain.handle('osn:setFormat', async (_, format: (typeof VIDEO_FORMATS)[number]) => {
       this.osnManager.setFormat(format);
+    });
+
+    ipcMain.handle('osn:setFps', async (_, fps: (typeof FPS_VALUES)[number]) => {
+      this.osnManager.setFps(fps);
+    });
+
+    ipcMain.handle('osn:getFpsValues', async () => {
+      return FPS_VALUES;
     });
   }
 }

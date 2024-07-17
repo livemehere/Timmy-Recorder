@@ -16,10 +16,15 @@ export default function Recorder({}: Props) {
   const [screenList, setScreenList] = useState<TScreen[]>([]);
   const [selectedScreen, setSelectedScreen] = useState<TScreen | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+  const [selectedFPS, setSelectedFPS] = useState<number | null>(null);
   const { data: formats } = useInvoke<string[]>('osn:formatValues', true, (formats) => {
     setSelectedFormat(formats[0]);
   });
+  const { data: fpsValues } = useInvoke<number[]>('osn:getFpsValues', true, (fpsValues) => {
+    setSelectedFPS(fpsValues[0]);
+  });
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
+  const { invoke: invokeSetFps } = useInvoke<undefined>('osn:setFps');
 
   const start = () => {
     window.app.invoke('osn:start');
@@ -40,21 +45,40 @@ export default function Recorder({}: Props) {
           녹화 중지
         </button>
       </section>
-      <section>
+      <section className={'flex gap-6'}>
         <Listbox
           value={selectedFormat}
           onChange={(value) => {
             setSelectedFormat(value);
             invokeSetFormat(value);
           }}>
-          <ListboxButton>{selectedFormat}</ListboxButton>
-          <ListboxOptions>
-            {formats?.map((format) => (
-              <ListboxOption key={format} value={format} className={'cursor-pointer'}>
-                {format}
-              </ListboxOption>
-            ))}
-          </ListboxOptions>
+          <div className={'flex flex-col gap-2'}>
+            <ListboxButton>{selectedFormat}</ListboxButton>
+            <ListboxOptions>
+              {formats?.map((format) => (
+                <ListboxOption key={format} value={format} className={'cursor-pointer'}>
+                  {format}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </Listbox>
+        <Listbox
+          value={selectedFPS}
+          onChange={(value) => {
+            setSelectedFPS(value);
+            invokeSetFps(value);
+          }}>
+          <div className={'flex flex-col gap-2'}>
+            <ListboxButton>{selectedFPS}</ListboxButton>
+            <ListboxOptions>
+              {fpsValues?.map((fps) => (
+                <ListboxOption key={fps} value={fps} className={'cursor-pointer'}>
+                  {fps}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
         </Listbox>
       </section>
       <section className={'flex flex-col items-center'}>
