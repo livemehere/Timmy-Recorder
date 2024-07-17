@@ -142,6 +142,16 @@ class Main {
       console.log(options);
       new Notification(options).show();
     });
+
+
+    /* OSN */
+    ipcMain.handle('osn:start', async () => {
+      this.osnManager.startRecording();
+    });
+
+    ipcMain.handle('osn:stop', async () => {
+      this.osnManager.stopRecording();
+    });
   }
 }
 

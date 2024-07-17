@@ -3,7 +3,7 @@ import path from 'path';
 import electron, { app, screen } from 'electron';
 import { uid } from 'uid';
 import { byOS, isMac, OS } from '@main/utils/byOS';
-import OBSWebSocket from 'obs-websocket-js';
+import debugLog from "@shared/debugLog";
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
@@ -21,6 +21,7 @@ export class ObsManager {
   host: string;
   obsStudioNodePkgPath: string;
   osnDataPath: string;
+  isInit =false;
 
   constructor(props: ObsManagerProps) {
     this.host = props.host || HOST_NAME + uid(8);
@@ -29,11 +30,6 @@ export class ObsManager {
     this.debug = props.debug || false;
   }
 
-  private debugLog(...args: any[]) {
-    if (this.debug) {
-      console.log(...args);
-    }
-  }
 
   init() {
     osn.NodeObs.IPC.host(this.host);
@@ -41,29 +37,22 @@ export class ObsManager {
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
 
     if (apiInitRes !== 0) {
+      this.shutdown();
       throw new Error('Failed to initialize OBS');
     }
-    this.debugLog('OBS Successfully initialized');
-
-    console.log(osn.NodeObs.IPC.setServerPath(this.host));
-    const network = osn.NodeObs.Network.create();
-    console.log('bindIP', network.bindIP);
-
-    const obs = new OBSWebSocket.default();
-    obs.connect('ws://default').then((res) => {
-      console.log('res', res);
-    });
-
+    debugLog('OBS Successfully initialized');
     this.setSetting('Output', 'Mode', 'Simple');
-    const availableEncoders = this.getAvailableValues('Output', 'Recording', isMac() ? 'RecAEncoder' : 'RecEncoder');
-    this.setSetting('Output', 'RecEncoder', availableEncoders.slice(-1)[0] || 'x264');
+    // const availableEncoders = this.getAvailableValues('Output', 'Recording', isMac() ? 'RecAEncoder' : 'RecEncoder');
+    // console.log(availableEncoders)
+    this.setSetting('Output', 'RecEncoder', 'x264');
     this.setSetting('Output', 'FilePath', app.getPath('desktop'));
     this.setSetting('Output', 'RecFormat', 'mkv');
     this.setSetting('Output', 'VBitrate', 10000); // 10 Mbps
     this.setSetting('Video', 'FPSCommon', 60);
 
-    // const scene = this.setupScene();
-    // this.setupSources(scene);
+    const scene = this.setupScene();
+    this.setupSources(scene);
+    this.isInit = true;
     // console.log('scene', scene);
 
     // osn.NodeObs.OBS_service_startRecording();
@@ -75,7 +64,7 @@ export class ObsManager {
   }
 
   shutdown() {
-    this.debugLog('Shutting down OBS process');
+    debugLog('Shutting down OBS process');
     try {
       osn.NodeObs.OBS_service_removeCallback();
       osn.NodeObs.IPC.disconnect();
@@ -102,7 +91,7 @@ export class ObsManager {
       osn.NodeObs.OBS_settings_saveSettings(category, settings);
     }
 
-    this.debugLog(`Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
+    debugLog(`Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
   }
 
   getAvailableValues(category: string, subcategory: string, parameter: any) {
@@ -172,6 +161,45 @@ export class ObsManager {
 
   setupSources(scene: osn.IScene) {
     osn.Global.setOutputSource(1, scene);
+
     this.setSetting('Output', 'Track1Name', 'Mixed: all sources');
+    let currentTrack = 2;
+
+    // getAudioDevices(byOS({ [OS.Windows]: 'wasapi_output_capture', [OS.Mac]: 'coreaudio_output_capture' }), 'desktop-audio').forEach(metadata => {
+    //   if (metadata.device_id === 'default') return;
+    //   const source = osn.InputFactory.create(byOS({ [OS.Windows]: 'wasapi_output_capture', [OS.Mac]: 'coreaudio_output_capture' }), 'desktop-audio', { device_id: metadata.device_id });
+    //   setSetting('Output', `Track${currentTrack}Name`, metadata.name);
+    //   source.audioMixers = 1 | (1 << currentTrack-1); // Bit mask to output to only tracks 1 and current track
+    //   osn.Global.setOutputSource(currentTrack, source);
+    //   currentTrack++;
+    // });
+    //
+    // getAudioDevices(byOS({ [OS.Windows]: 'wasapi_input_capture', [OS.Mac]: 'coreaudio_input_capture' }), 'mic-audio').forEach(metadata => {
+    //   if (metadata.device_id === 'default') return;
+    //   const source = osn.InputFactory.create(byOS({ [OS.Windows]: 'wasapi_input_capture', [OS.Mac]: 'coreaudio_input_capture' }), 'mic-audio', { device_id: metadata.device_id });
+    //   setSetting('Output', `Track${currentTrack}Name`, metadata.name);
+    //   source.audioMixers = 1 | (1 << currentTrack-1); // Bit mask to output to only tracks 1 and current track
+    //   osn.Global.setOutputSource(currentTrack, source);
+    //   currentTrack++;
+    // });
+
+    this.setSetting('Output', 'RecTracks', parseInt('1'.repeat(currentTrack-1), 2)); // Bit mask of used tracks: 1111 to use first four (from available six)
+  }
+
+  startRecording(){
+    if(!this.isInit){
+      throw new Error('OBS is not initialized')
+    }
+    debugLog('Starting recording...');
+    osn.NodeObs.OBS_service_startRecording();
+  }
+
+  stopRecording(){
+    if(!this.isInit){
+      throw new Error('OBS is not initialized')
+    }
+    debugLog('Stopping recording...');
+    osn.NodeObs.OBS_service_stopRecording();
+    debugLog('Stopped!');
   }
 }

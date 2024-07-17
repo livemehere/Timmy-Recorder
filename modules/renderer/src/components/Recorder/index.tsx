@@ -15,12 +15,21 @@ type TScreen = {
 export default function Recorder({}:Props) {
     const [screenList, setScreenList] = useState<TScreen[]>([])
     const [selectedScreen, setSelectedScreen] = useState<TScreen | null>(null)
+
+    const start = ()=>{
+        window.app.invoke('osn:start')
+    }
+
+    const stop = ()=>{
+        window.app.invoke('osn:stop')
+    }
+
     return (
         <div className={'flex flex-col items-center'}>
            <div>Recorder</div>
             <section className={'m-auto inline-flex justify-center gap-1 mb-2 bg-neutral-950 p-1 rounded-full'}>
-                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'}>녹화 시작</button>
-                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'}>녹화 중지</button>
+                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'} onClick={start}>녹화 시작</button>
+                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'} onClick={stop}>녹화 중지</button>
             </section>
             <section className={'flex flex-col items-center'}>
                 <h3 className={'text-xl font-bold mb-2'}>스크린 목록</h3>
