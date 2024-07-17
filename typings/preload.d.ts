@@ -1,4 +1,4 @@
-export type OSN = 'osn:start' | 'osn:stop';
+export type OSN = 'osn:start' | 'osn:stop' | 'osn:formatValues' | 'osn:setFormat';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN;
 export type TPreloadAPI = {
   invoke: <R = any>(channel: TInvokeChannel, ...args: any[]) => Promise<R>;

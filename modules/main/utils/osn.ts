@@ -3,11 +3,24 @@ import path from 'path';
 import electron, { app, screen } from 'electron';
 import { uid } from 'uid';
 import { byOS, isMac, OS } from '@main/utils/byOS';
-import debugLog from "@shared/debugLog";
+import debugLog from '@shared/debugLog';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
 const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
+
+export const VIDEO_BIT_RATES = [
+  { label: '360p (1.5Mbps)', value: 1500 },
+  { label: '480p (4Mbps)', value: 4000 },
+  { label: '720p (7.5Mbps)', value: 7500 },
+  { label: '1080p (12Mbps)', value: 12000 },
+  { label: '1440p (24Mbps)', value: 24000 },
+  { label: '4K (50Mbps)', value: 50000 }
+] as const;
+
+export const VIDEO_FORMATS = ['mkv', 'mp4'] as const;
+export const VIDEO_OUTPUT_WIDTHS = [480, 720, 1080, 1440, 2160] as const;
+export const FPS_VALUES = [24, 30, 60, 120, 144, 240] as const;
 
 interface ObsManagerProps {
   debug?: boolean;
@@ -21,7 +34,7 @@ export class ObsManager {
   host: string;
   obsStudioNodePkgPath: string;
   osnDataPath: string;
-  isInit =false;
+  isInit = false;
 
   constructor(props: ObsManagerProps) {
     this.host = props.host || HOST_NAME + uid(8);
@@ -29,7 +42,6 @@ export class ObsManager {
     this.osnDataPath = props.osnDataPath || OBS_DATA_PATH;
     this.debug = props.debug || false;
   }
-
 
   init() {
     osn.NodeObs.IPC.host(this.host);
@@ -56,6 +68,27 @@ export class ObsManager {
     // console.log('scene', scene);
 
     // osn.NodeObs.OBS_service_startRecording();
+  }
+
+  setFps(fps: (typeof FPS_VALUES)[number]) {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
+    }
+    this.setSetting('Video', 'FPSCommon', fps);
+  }
+
+  setBitrate(bitrate: (typeof VIDEO_BIT_RATES)[number]['value']) {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
+    }
+    this.setSetting('Output', 'VBitrate', bitrate);
+  }
+
+  setFormat(format: (typeof VIDEO_FORMATS)[number]) {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
+    }
+    this.setSetting('Output', 'RecFormat', format);
   }
 
   getDisplayList() {
@@ -183,20 +216,20 @@ export class ObsManager {
     //   currentTrack++;
     // });
 
-    this.setSetting('Output', 'RecTracks', parseInt('1'.repeat(currentTrack-1), 2)); // Bit mask of used tracks: 1111 to use first four (from available six)
+    this.setSetting('Output', 'RecTracks', parseInt('1'.repeat(currentTrack - 1), 2)); // Bit mask of used tracks: 1111 to use first four (from available six)
   }
 
-  startRecording(){
-    if(!this.isInit){
-      throw new Error('OBS is not initialized')
+  startRecording() {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
     }
     debugLog('Starting recording...');
     osn.NodeObs.OBS_service_startRecording();
   }
 
-  stopRecording(){
-    if(!this.isInit){
-      throw new Error('OBS is not initialized')
+  stopRecording() {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
     }
     debugLog('Stopping recording...');
     osn.NodeObs.OBS_service_stopRecording();

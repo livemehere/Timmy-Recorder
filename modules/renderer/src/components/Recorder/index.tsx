@@ -1,49 +1,83 @@
-import {useState} from "react";
+import { useState } from 'react';
+import useInvoke from '@renderer/src/hooks/useInvoke';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 
-type Props = {
-
-}
+type Props = {};
 
 type TScreen = {
-    name:string;
-    width: number;
-    height: number;
-    x:number;
-    y:number;
-}
+  name: string;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+};
 
-export default function Recorder({}:Props) {
-    const [screenList, setScreenList] = useState<TScreen[]>([])
-    const [selectedScreen, setSelectedScreen] = useState<TScreen | null>(null)
+export default function Recorder({}: Props) {
+  const [screenList, setScreenList] = useState<TScreen[]>([]);
+  const [selectedScreen, setSelectedScreen] = useState<TScreen | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+  const { data: formats } = useInvoke<string[]>('osn:formatValues', true, (formats) => {
+    setSelectedFormat(formats[0]);
+  });
+  const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
 
-    const start = ()=>{
-        window.app.invoke('osn:start')
-    }
+  const start = () => {
+    window.app.invoke('osn:start');
+  };
 
-    const stop = ()=>{
-        window.app.invoke('osn:stop')
-    }
+  const stop = () => {
+    window.app.invoke('osn:stop');
+  };
 
-    return (
-        <div className={'flex flex-col items-center'}>
-           <div>Recorder</div>
-            <section className={'m-auto inline-flex justify-center gap-1 mb-2 bg-neutral-950 p-1 rounded-full'}>
-                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'} onClick={start}>녹화 시작</button>
-                <button className={'hover:bg-neutral-800 rounded-full py-1 px-2 text-sm'} onClick={stop}>녹화 중지</button>
-            </section>
-            <section className={'flex flex-col items-center'}>
-                <h3 className={'text-xl font-bold mb-2'}>스크린 목록</h3>
-                {screenList.length >0 ?<ul>
-                    {screenList.map((screen, index) => (
-                        <li key={index} onClick={() => {
-                            setSelectedScreen(screen)
-                        }}>
-                            <div>{screen.name}</div>
-                            <div>{screen.width} x {screen.height}</div>
-                        </li>
-                    ))}
-                </ul> : <div>녹화 가능한 스크린이 없습니다 ㅜ_ㅜ</div>}
-            </section>
-        </div>
-    );
+  return (
+    <div className={'flex flex-col items-center'}>
+      <div>Recorder</div>
+      <section className={'m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1'}>
+        <button className={'rounded-full px-2 py-1 text-sm hover:bg-neutral-800'} onClick={start}>
+          녹화 시작
+        </button>
+        <button className={'rounded-full px-2 py-1 text-sm hover:bg-neutral-800'} onClick={stop}>
+          녹화 중지
+        </button>
+      </section>
+      <section>
+        <Listbox
+          value={selectedFormat}
+          onChange={(value) => {
+            setSelectedFormat(value);
+            invokeSetFormat(value);
+          }}>
+          <ListboxButton>{selectedFormat}</ListboxButton>
+          <ListboxOptions>
+            {formats?.map((format) => (
+              <ListboxOption key={format} value={format} className={'cursor-pointer'}>
+                {format}
+              </ListboxOption>
+            ))}
+          </ListboxOptions>
+        </Listbox>
+      </section>
+      <section className={'flex flex-col items-center'}>
+        <h3 className={'mb-2 text-xl font-bold'}>스크린 목록</h3>
+        {screenList.length > 0 ? (
+          <ul>
+            {screenList.map((screen, index) => (
+              <li
+                key={index}
+                onClick={() => {
+                  setSelectedScreen(screen);
+                }}>
+                <div>{screen.name}</div>
+                <div>
+                  {screen.width} x {screen.height}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div>녹화 가능한 스크린이 없습니다 ㅜ_ㅜ</div>
+        )}
+      </section>
+    </div>
+  );
 }

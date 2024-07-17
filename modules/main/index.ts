@@ -3,7 +3,7 @@ import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
 import { settings } from '@main/Settings';
-import { ObsManager } from '@main/utils/osn';
+import { ObsManager, VIDEO_FORMATS } from '@main/utils/osn';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -143,7 +143,6 @@ class Main {
       new Notification(options).show();
     });
 
-
     /* OSN */
     ipcMain.handle('osn:start', async () => {
       this.osnManager.startRecording();
@@ -151,6 +150,14 @@ class Main {
 
     ipcMain.handle('osn:stop', async () => {
       this.osnManager.stopRecording();
+    });
+
+    ipcMain.handle('osn:formatValues', async () => {
+      return VIDEO_FORMATS;
+    });
+
+    ipcMain.handle('osn:setFormat', async (_, format: (typeof VIDEO_FORMATS)[number]) => {
+      this.osnManager.setFormat(format);
     });
   }
 }
