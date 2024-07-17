@@ -70,11 +70,11 @@ export class ObsManager {
     this.setSetting('Video', 'FPSCommon', fps);
   }
 
-  setBitrate(bitrate: (typeof VIDEO_BIT_RATES)[number]['value']) {
+  setBitrate(bitrate: (typeof VIDEO_BIT_RATES)[number]) {
     if (!this.isInit) {
       throw new Error('OBS is not initialized');
     }
-    this.setSetting('Output', 'VBitrate', bitrate);
+    this.setSetting('Output', 'VBitrate', bitrate.value);
   }
 
   setFormat(format: (typeof VIDEO_FORMATS)[number]) {
@@ -212,7 +212,7 @@ export class ObsManager {
 
       const scene = osn.SceneFactory.create('test-scene');
       const sceneItem = scene.add(videoSource);
-      // sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
+      sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
 
       const s = scene.getItems()[0];
       console.log(s.source.name);
