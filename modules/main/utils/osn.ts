@@ -194,6 +194,9 @@ export class ObsManager {
       const scene = osn.SceneFactory.create('test-scene');
       const sceneItem = scene.add(videoSource);
       sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
+
+      debugLog(`Monitor capture Scene Setted : ${scene}`);
+      console.log(sceneItem.source.width, sceneItem.source.height);
       return scene;
     } else if (option.captureType === 'window_capture') {
       debugLog('윈도우를 캡쳐합니다');
