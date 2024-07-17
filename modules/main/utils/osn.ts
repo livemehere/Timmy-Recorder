@@ -4,23 +4,12 @@ import electron, { app, screen } from 'electron';
 import { uid } from 'uid';
 import { byOS, isMac, OS } from '@main/utils/byOS';
 import debugLog from '@shared/debugLog';
+import { MonitorInfo, SceneOption } from '@shared/shared-type';
+import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
 const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
-
-export const VIDEO_BIT_RATES = [
-  { label: '360p (1.5Mbps)', value: 1500 },
-  { label: '480p (4Mbps)', value: 4000 },
-  { label: '720p (7.5Mbps)', value: 7500 },
-  { label: '1080p (12Mbps)', value: 12000 },
-  { label: '1440p (24Mbps)', value: 24000 },
-  { label: '4K (50Mbps)', value: 50000 }
-] as const;
-
-export const VIDEO_FORMATS = ['mkv', 'mp4'] as const;
-export const VIDEO_OUTPUT_WIDTHS = [480, 720, 1080, 1440, 2160] as const;
-export const FPS_VALUES = [24, 30, 60, 120, 144, 240] as const;
 
 interface ObsManagerProps {
   debug?: boolean;
@@ -53,21 +42,22 @@ export class ObsManager {
       throw new Error('Failed to initialize OBS');
     }
     debugLog('OBS Successfully initialized');
+    // TODO: set 하는 곳에서 저장해두고, 최초 실행시에 불러와서 적용하도록 수정
     this.setSetting('Output', 'Mode', 'Simple');
     // const availableEncoders = this.getAvailableValues('Output', 'Recording', isMac() ? 'RecAEncoder' : 'RecEncoder');
     // console.log(availableEncoders)
     this.setSetting('Output', 'RecEncoder', 'x264');
     this.setSetting('Output', 'FilePath', app.getPath('desktop'));
-    this.setSetting('Output', 'RecFormat', 'mkv');
-    this.setSetting('Output', 'VBitrate', 10000); // 10 Mbps
-    this.setSetting('Video', 'FPSCommon', 60);
+    this.setSetting('Output', 'RecFormat', VIDEO_FORMATS[0]);
+    this.setSetting('Output', 'VBitrate', VIDEO_BIT_RATES[0]); // 10 Mbps
+    this.setSetting('Video', 'FPSCommon', FPS_VALUES[0]);
 
-    const scene = this.setupScene();
-    this.setupSources(scene);
+    const defaultMonitor = this.getMonitorList()[0];
+    this.updateScene({
+      captureType: 'monitor_capture',
+      monitorInfo: defaultMonitor
+    });
     this.isInit = true;
-    // console.log('scene', scene);
-
-    // osn.NodeObs.OBS_service_startRecording();
   }
 
   setFps(fps: (typeof FPS_VALUES)[number]) {
@@ -91,9 +81,9 @@ export class ObsManager {
     this.setSetting('Output', 'RecFormat', format);
   }
 
-  getDisplayList() {
-    const primaryDisplays = electron.screen.getPrimaryDisplay();
-    return primaryDisplays;
+  updateScene(option: SceneOption) {
+    const scene = this.setupScene(option);
+    this.setupSources(scene);
   }
 
   shutdown() {
@@ -127,7 +117,7 @@ export class ObsManager {
     debugLog(`Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
   }
 
-  getAvailableValues(category: string, subcategory: string, parameter: any) {
+  private getAvailableValues(category: string, subcategory: string, parameter: any) {
     const categorySettings = osn.NodeObs.OBS_settings_getSettings(category).data;
     if (!categorySettings) {
       console.warn(`There is no category ${category} in OBS settings`);
@@ -149,47 +139,57 @@ export class ObsManager {
     return parameterSettings.values.map((value: any) => Object.values(value)[0]);
   }
 
-  setupScene() {
-    console.log('setupScene');
-    const videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'monitor_capture', [OS.Mac]: 'display_capture' }), 'desktop-video');
-    console.log('videoSource', videoSource);
+  getMonitorList(): MonitorInfo[] {
+    const screens = screen.getAllDisplays();
+    return screens.map<MonitorInfo>((screen, index) => {
+      const { width: originWidth, height: originHeight } = screen.size;
+      const aspectRatio = originWidth / originHeight;
 
-    const { physicalWidth, physicalHeight, aspectRatio } = this.displayInfo();
-
-    // Update source settings:
-    const settings = videoSource.settings;
-    settings['width'] = physicalWidth;
-    settings['height'] = physicalHeight;
-    videoSource.update(settings);
-    videoSource.save();
-
-    // Set output video size to 1920x1080
-    const outputWidth = 1920;
-    const outputHeight = Math.round(outputWidth / aspectRatio);
-    this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
-    this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
-    const videoScaleFactor = physicalWidth / outputWidth;
-
-    // A scene is necessary here to properly scale captured screen size to output video size
-    const scene = osn.SceneFactory.create('test-scene');
-    const sceneItem = scene.add(videoSource);
-    sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
-
-    return scene;
+      return {
+        monitorIndex: index,
+        label: `${screen.label}-${screen.id}`,
+        width: originWidth,
+        height: originHeight,
+        scaleFactor: screen.scaleFactor,
+        physicalWidth: originWidth * screen.scaleFactor,
+        physicalHeight: originHeight * screen.scaleFactor,
+        aspectRatio
+      };
+    });
   }
 
-  displayInfo() {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.size;
-    const { scaleFactor } = primaryDisplay;
-    return {
-      width,
-      height,
-      scaleFactor: scaleFactor,
-      aspectRatio: width / height,
-      physicalWidth: width * scaleFactor,
-      physicalHeight: height * scaleFactor
-    };
+  setupScene(option: SceneOption) {
+    let videoSource: osn.IInput;
+    if (option.captureType === 'monitor_capture') {
+      videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'monitor_capture', [OS.Mac]: 'display_capture' }), 'desktop-video', {
+        monitor: option.monitorInfo.monitorIndex
+      });
+      const settings = videoSource.settings;
+      settings['width'] = option.monitorInfo.physicalWidth;
+      settings['height'] = option.monitorInfo.physicalHeight;
+      // TODO: x,y 좌표값 설정 찾기
+      // settings['screenX'] = 300;
+      // settings['screenY'] = 300;
+      videoSource.update(settings);
+      videoSource.save();
+
+      // Set output video size to monitor size
+      const outputWidth = option.monitorInfo.width;
+      const outputHeight = Math.round(outputWidth / option.monitorInfo.aspectRatio);
+      this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
+      this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
+      const videoScaleFactor = option.monitorInfo.physicalWidth / outputWidth;
+
+      // A scene is necessary here to properly scale captured screen size to output video size
+      const scene = osn.SceneFactory.create('test-scene');
+      const sceneItem = scene.add(videoSource);
+      sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
+      return scene;
+    }
+
+    // TODO: window_capture 구현하기
+
+    throw new Error(`지원하지 않는 captureType입니다. (${option.captureType}은 지원하지 않습니다.)`);
   }
 
   setupSources(scene: osn.IScene) {

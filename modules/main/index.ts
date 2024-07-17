@@ -3,7 +3,9 @@ import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
 import { settings } from '@main/Settings';
-import { FPS_VALUES, ObsManager, VIDEO_FORMATS } from '@main/utils/osn';
+import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
+import { SceneOption } from '@shared/shared-type';
+import { ObsManager } from '@main/utils/osn';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -166,6 +168,26 @@ class Main {
 
     ipcMain.handle('osn:getFpsValues', async () => {
       return FPS_VALUES;
+    });
+
+    // get monitor list
+    ipcMain.handle('osn:getMonitorList', async () => {
+      return this.osnManager.getMonitorList();
+    });
+
+    // update scene
+    ipcMain.handle('osn:updateScene', async (_, option: SceneOption) => {
+      this.osnManager.updateScene(option);
+    });
+
+    // bitrate list
+    ipcMain.handle('osn:getBitrateValues', async () => {
+      return VIDEO_BIT_RATES;
+    });
+
+    // set bitrate
+    ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]['value']) => {
+      this.osnManager.setBitrate(bitrate);
     });
   }
 }

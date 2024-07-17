@@ -1,4 +1,14 @@
-export type OSN = 'osn:start' | 'osn:stop' | 'osn:formatValues' | 'osn:setFormat' | 'osn:setFps' | 'osn:getFpsValues';
+export type OSN =
+  | 'osn:start'
+  | 'osn:stop'
+  | 'osn:formatValues'
+  | 'osn:setFormat'
+  | 'osn:setFps'
+  | 'osn:getFpsValues'
+  | 'osn:getMonitorList'
+  | 'osn:updateScene'
+  | 'osn:getBitrateValues'
+  | 'osn:setBitrate';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN;
 export type TPreloadAPI = {
   invoke: <R = any>(channel: TInvokeChannel, ...args: any[]) => Promise<R>;

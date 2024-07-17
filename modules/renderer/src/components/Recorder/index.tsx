@@ -1,30 +1,34 @@
 import { useState } from 'react';
 import useInvoke from '@renderer/src/hooks/useInvoke';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
+import { MonitorInfo } from '@shared/shared-type';
+import { VIDEO_BIT_RATES } from '@shared/shared-const';
 
 type Props = {};
 
-type TScreen = {
-  name: string;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-};
-
 export default function Recorder({}: Props) {
-  const [screenList, setScreenList] = useState<TScreen[]>([]);
-  const [selectedScreen, setSelectedScreen] = useState<TScreen | null>(null);
+  const [selectedMonitor, setSelectedMonitor] = useState<MonitorInfo | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
   const [selectedFPS, setSelectedFPS] = useState<number | null>(null);
+  const [selectedBitRate, setSelectedBitRate] = useState<(typeof VIDEO_BIT_RATES)[number] | null>(null);
   const { data: formats } = useInvoke<string[]>('osn:formatValues', true, (formats) => {
     setSelectedFormat(formats[0]);
   });
   const { data: fpsValues } = useInvoke<number[]>('osn:getFpsValues', true, (fpsValues) => {
     setSelectedFPS(fpsValues[0]);
   });
+  const { data: monitorList } = useInvoke<MonitorInfo[]>('osn:getMonitorList', true, (monitors) => {
+    setSelectedMonitor(monitors[0]);
+  });
+
+  const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>('osn:getBitrateValues', true, (bitRateValues) => {
+    setSelectedBitRate(bitRateValues[0]);
+  });
+
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
   const { invoke: invokeSetFps } = useInvoke<undefined>('osn:setFps');
+  const { invoke: invokeUpdateScene } = useInvoke<undefined>('osn:updateScene');
+  const { invoke: invokeSetBitrate } = useInvoke<undefined>('osn:setBitrate');
 
   const start = () => {
     window.app.invoke('osn:start');
@@ -80,27 +84,40 @@ export default function Recorder({}: Props) {
             </ListboxOptions>
           </div>
         </Listbox>
-      </section>
-      <section className={'flex flex-col items-center'}>
-        <h3 className={'mb-2 text-xl font-bold'}>스크린 목록</h3>
-        {screenList.length > 0 ? (
-          <ul>
-            {screenList.map((screen, index) => (
-              <li
-                key={index}
-                onClick={() => {
-                  setSelectedScreen(screen);
-                }}>
-                <div>{screen.name}</div>
-                <div>
-                  {screen.width} x {screen.height}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div>녹화 가능한 스크린이 없습니다 ㅜ_ㅜ</div>
-        )}
+        <Listbox
+          value={selectedBitRate}
+          onChange={(value) => {
+            setSelectedBitRate(value);
+            invokeSetBitrate(value);
+          }}>
+          <div className={'flex flex-col gap-2'}>
+            <ListboxButton>{selectedBitRate?.label}</ListboxButton>
+            <ListboxOptions>
+              {bitRateValues?.map((bitRate) => (
+                <ListboxOption key={bitRate.value} value={bitRate} className={'cursor-pointer'}>
+                  {bitRate.label}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </Listbox>
+        <Listbox
+          value={selectedMonitor}
+          onChange={(value) => {
+            setSelectedMonitor(value);
+            invokeUpdateScene({ captureType: 'monitor_capture', monitorInfo: value });
+          }}>
+          <div className={'flex flex-col gap-2'}>
+            <ListboxButton>{selectedMonitor?.label}</ListboxButton>
+            <ListboxOptions>
+              {monitorList?.map((monitor) => (
+                <ListboxOption key={monitor.monitorIndex} value={monitor} className={'cursor-pointer'}>
+                  {monitor.label}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </Listbox>
       </section>
     </div>
   );
