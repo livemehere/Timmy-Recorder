@@ -12,23 +12,54 @@ export default function Recorder({}: Props) {
   const [selectedFPS, setSelectedFPS] = useState<number | null>(null);
   const [selectedBitRate, setSelectedBitRate] = useState<(typeof VIDEO_BIT_RATES)[number] | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<WindowInfo | null>(null);
-  const { data: formats } = useInvoke<string[]>('osn:formatValues', true, (formats) => {
-    setSelectedFormat(formats[0]);
-  });
-  const { data: fpsValues } = useInvoke<number[]>('osn:getFpsValues', true, (fpsValues) => {
-    setSelectedFPS(fpsValues[0]);
-  });
-  const { data: monitorList } = useInvoke<MonitorInfo[]>('osn:getMonitorList', true, (monitors) => {
-    setSelectedMonitor(monitors[0]);
-  });
+  const { data: formats } = useInvoke<string[]>(
+    'osn:formatValues',
+    (formats) => {
+      setSelectedFormat(formats[0]);
+    },
+    {
+      initialRun: true
+    }
+  );
+  const { data: fpsValues } = useInvoke<number[]>(
+    'osn:getFpsValues',
+    (fpsValues) => {
+      setSelectedFPS(fpsValues[0]);
+    },
+    {
+      initialRun: true
+    }
+  );
+  const { data: monitorList } = useInvoke<MonitorInfo[]>(
+    'osn:getMonitorList',
+    (monitors) => {
+      setSelectedMonitor(monitors[0]);
+    },
+    {
+      initialRun: true
+    }
+  );
 
-  const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>('osn:getBitrateValues', true, (bitRateValues) => {
-    setSelectedBitRate(bitRateValues[0]);
-  });
+  const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>(
+    'osn:getBitrateValues',
+    (bitRateValues) => {
+      setSelectedBitRate(bitRateValues[0]);
+    },
+    {
+      initialRun: true
+    }
+  );
 
-  const { data: windowList } = useInvoke<WindowInfo[]>('osn:getWindowList', true, (windowList) => {
-    setSelectedWindow(windowList[0]);
-  });
+  const { data: windowList, isFetching: windowIsFetching } = useInvoke<WindowInfo[]>(
+    'osn:getWindowList',
+    (windowList) => {
+      setSelectedWindow(windowList[0]);
+    },
+    {
+      initialRun: true,
+      fetchTicker: 1000
+    }
+  );
 
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
   const { invoke: invokeSetFps } = useInvoke<undefined>('osn:setFps');
@@ -130,7 +161,9 @@ export default function Recorder({}: Props) {
             invokeUpdateScene({ captureType: 'window_capture', windowInfo: value });
           }}>
           <div className={'flex flex-col gap-2'}>
-            <ListboxButton>{selectedWindow?.name}</ListboxButton>
+            <ListboxButton>
+              {selectedWindow?.name} {windowIsFetching && '...'}
+            </ListboxButton>
             <ListboxOptions>
               {windowList?.map((window) => (
                 <ListboxOption key={window.value} value={window} className={'cursor-pointer'}>
