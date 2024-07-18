@@ -2,6 +2,8 @@ import { dataPath } from '@main/DataPath';
 import { join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import debugLog from '@shared/debugLog';
+import { SceneOption } from '@shared/shared-type';
+import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 
 export interface SettingsData {
   bounds: {
@@ -9,6 +11,13 @@ export interface SettingsData {
     y: number;
     width: number;
     height: number;
+  };
+  obs: {
+    outDir: string;
+    videoFormat: (typeof VIDEO_FORMATS)[number];
+    videoBitRate: (typeof VIDEO_BIT_RATES)[number];
+    videoFps: (typeof FPS_VALUES)[number];
+    latestSceneOption: SceneOption;
   };
 }
 

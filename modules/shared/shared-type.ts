@@ -1,12 +1,14 @@
-export type SceneOption =
-  | {
-      captureType: 'monitor_capture';
-      monitorInfo: MonitorInfo;
-    }
-  | {
-      captureType: 'window_capture';
-      windowInfo: WindowInfo;
-    };
+export type MonitorScene = {
+  captureType: 'monitor_capture';
+  monitorInfo: MonitorInfo;
+};
+
+export type WindowScene = {
+  captureType: 'window_capture';
+  windowInfo: WindowInfo;
+};
+
+export type SceneOption = MonitorScene | WindowScene;
 
 export interface MonitorInfo {
   monitorIndex: number;

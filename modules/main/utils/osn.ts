@@ -6,6 +6,7 @@ import debugLog from '@shared/debugLog';
 import { MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { IListProperty } from 'obs-studio-node/module';
+import { settings, SettingsData } from '@main/Settings';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
@@ -30,6 +31,21 @@ export class ObsManager {
     this.obsStudioNodePkgPath = props.obsStudioNodePkgPath || OBS_NODE_PKG_PATH;
     this.osnDataPath = props.osnDataPath || OBS_DATA_PATH;
     this.debug = props.debug || false;
+
+    /** 최초 1회 기본값 세팅 */
+    const savedObsSetting = settings.get('obs');
+    if (!savedObsSetting) {
+      settings.set('obs', {
+        outDir: app.getPath('desktop'),
+        videoFormat: VIDEO_FORMATS[1], // mp4
+        videoBitRate: VIDEO_BIT_RATES[3], // 1080p (12Mbps)
+        videoFps: FPS_VALUES[2], // 60fps
+        latestSceneOption: {
+          captureType: 'monitor_capture',
+          monitorInfo: this.getMonitorList()[0]
+        }
+      });
+    }
   }
 
   init() {
@@ -43,29 +59,24 @@ export class ObsManager {
     }
     debugLog('OBS Successfully Running');
 
-    const DEFAULT_OUTPUT_DIR = app.getPath('desktop');
-    const DEFAULT_VIDEO_SOURCE = this.getMonitorList()[0];
-    const DEFAULT_VIDEO_FORMAT = VIDEO_FORMATS[1]; // mp4
-    const DEFAULT_VIDEO_BIT_RATE = VIDEO_BIT_RATES[3]; // 720p (7.5Mbps)
+    // 720p (7.5Mbps)
     // const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
     // console.log(availableEncoders);
 
     /** OBS 기본 셋업 */
-    // TODO: set 하는 곳에서 저장해두고, 최초 실행시에 불러와서 적용하도록 수정
+    const savedObsSettings = settings.get('obs');
     this.setSetting('Output', 'Mode', 'Simple');
     this.setSetting('Output', 'RecEncoder', 'x264');
-    this.setSetting('Output', 'FilePath', DEFAULT_OUTPUT_DIR);
-    this.setSetting('Output', 'RecFormat', DEFAULT_VIDEO_FORMAT);
-    this.setSetting('Output', 'VBitrate', DEFAULT_VIDEO_BIT_RATE.value); // 10 Mbps
-    this.setSetting('Video', 'FPSCommon', FPS_VALUES[0]);
-    this.updateScene({
-      captureType: 'monitor_capture',
-      monitorInfo: DEFAULT_VIDEO_SOURCE
-    });
+    this.setSetting('Output', 'FilePath', savedObsSettings.outDir);
+    this.setSetting('Output', 'RecFormat', savedObsSettings.videoFormat);
+    this.setSetting('Output', 'VBitrate', savedObsSettings.videoBitRate.value); // 10 Mbps
+    this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
+    this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
-    // desktopCapturer.getSources({ types: ['window'] }).then((res) => {
-    //   console.log(res);
-    // });
+  }
+
+  getSavedObsSettings(): SettingsData['obs'] {
+    return settings.get('obs');
   }
 
   setOutputDirectory(path: string) {
@@ -73,6 +84,7 @@ export class ObsManager {
       throw new Error('OBS is not initialized');
     }
     this.setSetting('Output', 'FilePath', path);
+    settings.set('obs', { ...settings.get('obs'), outDir: path });
   }
 
   setFps(fps: (typeof FPS_VALUES)[number]) {
@@ -80,6 +92,7 @@ export class ObsManager {
       throw new Error('OBS is not initialized');
     }
     this.setSetting('Video', 'FPSCommon', fps);
+    settings.set('obs', { ...settings.get('obs'), videoFps: fps });
   }
 
   setBitrate(bitrate: (typeof VIDEO_BIT_RATES)[number]) {
@@ -87,6 +100,7 @@ export class ObsManager {
       throw new Error('OBS is not initialized');
     }
     this.setSetting('Output', 'VBitrate', bitrate.value);
+    settings.set('obs', { ...settings.get('obs'), videoBitRate: bitrate });
   }
 
   setFormat(format: (typeof VIDEO_FORMATS)[number]) {
@@ -94,11 +108,13 @@ export class ObsManager {
       throw new Error('OBS is not initialized');
     }
     this.setSetting('Output', 'RecFormat', format);
+    settings.set('obs', { ...settings.get('obs'), videoFormat: format });
   }
 
   updateScene(option: SceneOption) {
     const scene = this.setupScene(option);
     this.setupSources(scene);
+    settings.set('obs', { ...settings.get('obs'), latestSceneOption: option });
   }
 
   shutdown() {

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { TInvokeChannel } from '../../../../typings/preload';
 
-interface Option {
+interface Option<R> {
   fetchTicker?: number; // ms
   initialRun?: boolean;
+  onInitialChange?: (data: R) => void;
+  onInvoke?: <Param = any>(data: Param) => void;
 }
 
-export default function useInvoke<R = any>(channel: TInvokeChannel, onInitialChange: (data: R) => void = () => {}, option?: Option) {
+export default function useInvoke<R = any>(channel: TInvokeChannel, option?: Option<R>) {
   const [data, setData] = useState<R>();
   const initialCalled = useRef(false);
   const ticker = useRef<number>();
@@ -17,10 +19,10 @@ export default function useInvoke<R = any>(channel: TInvokeChannel, onInitialCha
     if (!option?.initialRun || initialCalled.current) return;
     _invoke().then((res) => {
       setData(res);
-      onInitialChange(res);
+      option?.onInitialChange?.(res);
       initialCalled.current = true;
     });
-  }, [channel, option?.initialRun]);
+  }, [channel, option?.initialRun, option?.onInitialChange]);
 
   useEffect(() => {
     if (option?.fetchTicker) {
@@ -45,6 +47,7 @@ export default function useInvoke<R = any>(channel: TInvokeChannel, onInitialCha
     setIsFetching(true);
     const res = await window.app.invoke<R>(channel, args);
     setIsFetching(false);
+    option?.onInvoke?.(args);
     return res;
   };
 

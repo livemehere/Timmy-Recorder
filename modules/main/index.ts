@@ -10,7 +10,7 @@ import { ObsManager } from '@main/utils/osn';
 const IS_MAC = os.platform() === 'darwin';
 class Main {
   mainWindow: MainWindow | null = null;
-  osnManager = new ObsManager({ debug: true });
+  osnManager: ObsManager;
 
   async start() {
     /* 하드웨어 가속 끄면 확실히 성능 안잡아먹음 (대신 앱이 빡셀때 버벅임) */
@@ -19,6 +19,7 @@ class Main {
     this.appSettings();
     await this.createMainWindow();
     this.handleInvoke();
+    this.osnManager = new ObsManager({ debug: true });
     this.osnManager.init();
   }
 
@@ -170,6 +171,11 @@ class Main {
       return FPS_VALUES;
     });
 
+    // get current obs settings
+    ipcMain.handle('osn:getSettings', async () => {
+      return this.osnManager.getSavedObsSettings();
+    });
+
     // get monitor list
     ipcMain.handle('osn:getMonitorList', async () => {
       return this.osnManager.getMonitorList();
@@ -186,7 +192,7 @@ class Main {
     });
 
     // set bitrate
-    ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]['value']) => {
+    ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]) => {
       this.osnManager.setBitrate(bitrate);
     });
 

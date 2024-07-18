@@ -1,70 +1,27 @@
-import { useState } from 'react';
-import useInvoke from '@renderer/src/hooks/useInvoke';
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
-import { MonitorInfo, WindowInfo } from '@shared/shared-type';
-import { VIDEO_BIT_RATES } from '@shared/shared-const';
+
+import useObs from '@renderer/src/hooks/useObs';
 
 type Props = {};
 
 export default function Recorder({}: Props) {
-  const [selectedMonitor, setSelectedMonitor] = useState<MonitorInfo | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
-  const [selectedFPS, setSelectedFPS] = useState<number | null>(null);
-  const [selectedBitRate, setSelectedBitRate] = useState<(typeof VIDEO_BIT_RATES)[number] | null>(null);
-  const [selectedWindow, setSelectedWindow] = useState<WindowInfo | null>(null);
-  const { data: formats } = useInvoke<string[]>(
-    'osn:formatValues',
-    (formats) => {
-      setSelectedFormat(formats[0]);
-    },
-    {
-      initialRun: true
-    }
-  );
-  const { data: fpsValues } = useInvoke<number[]>(
-    'osn:getFpsValues',
-    (fpsValues) => {
-      setSelectedFPS(fpsValues[0]);
-    },
-    {
-      initialRun: true
-    }
-  );
-  const { data: monitorList } = useInvoke<MonitorInfo[]>(
-    'osn:getMonitorList',
-    (monitors) => {
-      setSelectedMonitor(monitors[0]);
-    },
-    {
-      initialRun: true
-    }
-  );
-
-  const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>(
-    'osn:getBitrateValues',
-    (bitRateValues) => {
-      setSelectedBitRate(bitRateValues[0]);
-    },
-    {
-      initialRun: true
-    }
-  );
-
-  const { data: windowList, isFetching: windowIsFetching } = useInvoke<WindowInfo[]>(
-    'osn:getWindowList',
-    (windowList) => {
-      setSelectedWindow(windowList[0]);
-    },
-    {
-      initialRun: true,
-      fetchTicker: 3000
-    }
-  );
-
-  const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat');
-  const { invoke: invokeSetFps } = useInvoke<undefined>('osn:setFps');
-  const { invoke: invokeUpdateScene } = useInvoke<undefined>('osn:updateScene');
-  const { invoke: invokeSetBitrate } = useInvoke<undefined>('osn:setBitrate');
+  const {
+    monitorList,
+    windowList,
+    windowIsFetching,
+    formats,
+    fpsValues,
+    bitRateValues,
+    selectedMonitor,
+    selectedWindow,
+    selectedFormat,
+    selectedFPS,
+    selectedBitRate,
+    invokeSetFormat,
+    invokeSetFps,
+    invokeUpdateScene,
+    invokeSetBitrate
+  } = useObs();
 
   const start = () => {
     window.app.invoke('osn:start');
@@ -89,7 +46,6 @@ export default function Recorder({}: Props) {
         <Listbox
           value={selectedFormat}
           onChange={(value) => {
-            setSelectedFormat(value);
             invokeSetFormat(value);
           }}>
           <div className={'flex flex-col gap-2'}>
@@ -106,7 +62,6 @@ export default function Recorder({}: Props) {
         <Listbox
           value={selectedFPS}
           onChange={(value) => {
-            setSelectedFPS(value);
             invokeSetFps(value);
           }}>
           <div className={'flex flex-col gap-2'}>
@@ -123,7 +78,6 @@ export default function Recorder({}: Props) {
         <Listbox
           value={selectedBitRate}
           onChange={(value) => {
-            setSelectedBitRate(value);
             invokeSetBitrate(value);
           }}>
           <div className={'flex flex-col gap-2'}>
@@ -140,11 +94,10 @@ export default function Recorder({}: Props) {
         <Listbox
           value={selectedMonitor}
           onChange={(value) => {
-            setSelectedMonitor(value);
             invokeUpdateScene({ captureType: 'monitor_capture', monitorInfo: value });
           }}>
           <div className={'flex flex-col gap-2'}>
-            <ListboxButton>{selectedMonitor?.label}</ListboxButton>
+            <ListboxButton>{selectedMonitor?.label || '모니터를 선택하세요'}</ListboxButton>
             <ListboxOptions>
               {monitorList?.map((monitor) => (
                 <ListboxOption key={monitor.monitorIndex} value={monitor} className={'cursor-pointer'}>
@@ -157,12 +110,11 @@ export default function Recorder({}: Props) {
         <Listbox
           value={selectedWindow}
           onChange={(value) => {
-            setSelectedWindow(value);
             invokeUpdateScene({ captureType: 'window_capture', windowInfo: value });
           }}>
           <div className={'flex flex-col gap-2'}>
             <ListboxButton>
-              {selectedWindow?.name} {windowIsFetching && '...'}
+              {selectedWindow?.name || '윈도우를 선택하세요'} {windowIsFetching && '...'}
             </ListboxButton>
             <ListboxOptions>
               {windowList?.map((window) => (
