@@ -57,7 +57,7 @@ export default function Recorder({}: Props) {
     },
     {
       initialRun: true,
-      fetchTicker: 1000
+      fetchTicker: 3000
     }
   );
 
