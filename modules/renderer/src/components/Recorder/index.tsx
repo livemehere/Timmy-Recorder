@@ -141,6 +141,12 @@ export default function Recorder({}: Props) {
           </div>
         </Listbox>
       </section>
+      <section>
+        <h3>Tips.</h3>
+        <ul>
+          <li>윈도우 녹화시 화면이 내려가면 정상적으로 녹호되지 않을 수 있습니다.</li>
+        </ul>
+      </section>
     </div>
   );
 }

@@ -2,10 +2,10 @@ import * as osn from 'obs-studio-node';
 import path from 'path';
 import { app, screen, desktopCapturer } from 'electron';
 import { uid } from 'uid';
-import { byOS, isMac, OS } from '@main/utils/byOS';
 import debugLog from '@shared/debugLog';
 import { MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
+import { IListProperty } from 'obs-studio-node/module';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
@@ -33,34 +33,46 @@ export class ObsManager {
   }
 
   init() {
+    /** OSN 실행 */
     osn.NodeObs.IPC.host(this.host);
     osn.NodeObs.SetWorkingDirectory(this.obsStudioNodePkgPath);
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
-
-    this.getWindowList();
-
     if (apiInitRes !== 0) {
       this.shutdown();
       throw new Error('Failed to initialize OBS');
     }
-    debugLog('OBS Successfully initialized');
+    debugLog('OBS Successfully Running');
+
+    const DEFAULT_OUTPUT_DIR = app.getPath('desktop');
+    const DEFAULT_VIDEO_SOURCE = this.getMonitorList()[0];
+    const DEFAULT_VIDEO_FORMAT = VIDEO_FORMATS[1]; // mp4
+    const DEFAULT_VIDEO_BIT_RATE = VIDEO_BIT_RATES[3]; // 720p (7.5Mbps)
+    // const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
+    // console.log(availableEncoders);
+
+    /** OBS 기본 셋업 */
     // TODO: set 하는 곳에서 저장해두고, 최초 실행시에 불러와서 적용하도록 수정
     this.setSetting('Output', 'Mode', 'Simple');
-    // const availableEncoders = this.getAvailableValues('Output', 'Recording', isMac() ? 'RecAEncoder' : 'RecEncoder');
-    // console.log(availableEncoders)
     this.setSetting('Output', 'RecEncoder', 'x264');
-    this.setSetting('Output', 'FilePath', app.getPath('desktop'));
-    this.setSetting('Output', 'RecFormat', VIDEO_FORMATS[0]);
-    this.setSetting('Output', 'VBitrate', VIDEO_BIT_RATES[0]); // 10 Mbps
+    this.setSetting('Output', 'FilePath', DEFAULT_OUTPUT_DIR);
+    this.setSetting('Output', 'RecFormat', DEFAULT_VIDEO_FORMAT);
+    this.setSetting('Output', 'VBitrate', DEFAULT_VIDEO_BIT_RATE.value); // 10 Mbps
     this.setSetting('Video', 'FPSCommon', FPS_VALUES[0]);
-
-    const defaultMonitor = this.getMonitorList()[0];
-
     this.updateScene({
       captureType: 'monitor_capture',
-      monitorInfo: defaultMonitor
+      monitorInfo: DEFAULT_VIDEO_SOURCE
     });
     this.isInit = true;
+    // desktopCapturer.getSources({ types: ['window'] }).then((res) => {
+    //   console.log(res);
+    // });
+  }
+
+  setOutputDirectory(path: string) {
+    if (!this.isInit) {
+      throw new Error('OBS is not initialized');
+    }
+    this.setSetting('Output', 'FilePath', path);
   }
 
   setFps(fps: (typeof FPS_VALUES)[number]) {
@@ -99,7 +111,7 @@ export class ObsManager {
     }
   }
 
-  setSetting(category: string, parameter: string, value: any) {
+  private setSetting(category: string, parameter: string, value: any) {
     let oldValue;
     // Getting settings container
     const settings = osn.NodeObs.OBS_settings_getSettings(category).data;
@@ -117,7 +129,7 @@ export class ObsManager {
       osn.NodeObs.OBS_settings_saveSettings(category, settings);
     }
 
-    debugLog(`Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
+    debugLog(`>> Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
   }
 
   private getAvailableValues(category: string, subcategory: string, parameter: any) {
@@ -142,6 +154,7 @@ export class ObsManager {
     return parameterSettings.values.map((value: any) => Object.values(value)[0]);
   }
 
+  /** 호출 시점에서 녹화 가능한 모니터 목록을 반환합니다. */
   getMonitorList(): MonitorInfo[] {
     const screens = screen.getAllDisplays();
     return screens.map<MonitorInfo>((screen, index) => {
@@ -161,72 +174,69 @@ export class ObsManager {
     });
   }
 
+  /** 호출 시점에서 녹화 가능한 윈도우창 목록을 반환합니다. */
   async getWindowList(): Promise<WindowInfo[]> {
-    const videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'window_capture', [OS.Mac]: 'window_capture' }), 'desktop-video', {});
-    // @ts-ignore
-    const _windows = videoSource.properties.get('window').details.items as WindowInfo[];
+    const videoSource = osn.InputFactory.create('window_capture', 'desktop-video');
+    const _windows = (videoSource.properties.get('window') as IListProperty).details.items as WindowInfo[];
     return _windows;
   }
 
   setupScene(option: SceneOption) {
-    let videoSource: osn.IInput;
+    const videoSource = osn.InputFactory.create(option.captureType, 'target-video');
+    const scene = osn.SceneFactory.create('capture-scene');
+
+    /** video 소스 셋업 (모니터 or 윈도우) */
     if (option.captureType === 'monitor_capture') {
-      videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'monitor_capture', [OS.Mac]: 'display_capture' }), 'desktop-video', {
-        monitor: option.monitorInfo.monitorIndex
-      });
+      debugLog(`Start Video source setup with monitor`);
+      debugLog(option);
+
+      /** 모니터 캡처 설정 */
       const settings = videoSource.settings;
+      settings['monitor'] = option.monitorInfo.monitorIndex;
       settings['width'] = option.monitorInfo.physicalWidth;
       settings['height'] = option.monitorInfo.physicalHeight;
-      // TODO: x,y 좌표값 설정 찾기
-      // settings['screenX'] = 300;
-      // settings['screenY'] = 300;
       videoSource.update(settings);
       videoSource.save();
 
-      // Set output video size to monitor size
+      /** 모니터 비율 조정(?) */
+      const videoScaleFactor = option.monitorInfo.scaleFactor;
+      const sceneItem = scene.add(videoSource);
+      sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
+
+      /** 결과물 사이즈 */
       const outputWidth = option.monitorInfo.width;
       const outputHeight = Math.round(outputWidth / option.monitorInfo.aspectRatio);
       this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
       this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
-      const videoScaleFactor = option.monitorInfo.physicalWidth / outputWidth;
 
-      // A scene is necessary here to properly scale captured screen size to output video size
-      const scene = osn.SceneFactory.create('test-scene');
-      const sceneItem = scene.add(videoSource);
-      sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
-
-      debugLog(`Monitor capture Scene Setted : ${scene}`);
-      console.log(sceneItem.source.width, sceneItem.source.height);
-      return scene;
+      debugLog(`Output Size: ${outputWidth}x${outputHeight}`);
+      debugLog('Video source setup complete');
     } else if (option.captureType === 'window_capture') {
-      debugLog('윈도우를 캡쳐합니다');
-      console.log(option);
-      videoSource = osn.InputFactory.create(byOS({ [OS.Windows]: 'window_capture', [OS.Mac]: 'window_capture' }), 'window-video', {});
+      debugLog(`Start Video source setup with window`);
+      debugLog(option);
+
+      /** 윈도우 캡처 설정 */
       const settings = videoSource.settings;
       settings['window'] = option.windowInfo.value;
       videoSource.update(settings);
       videoSource.save();
 
-      const outputWidth = videoSource.width;
-      const outputHeight = videoSource.height;
+      /** 윈도우 비율 조정(?) - 필요없나? */
       const videoScaleFactor = 1.0;
-      // this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
-      // this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
-
-      const scene = osn.SceneFactory.create('test-scene');
       const sceneItem = scene.add(videoSource);
       sceneItem.scale = { x: 1.0 / videoScaleFactor, y: 1.0 / videoScaleFactor };
 
-      const s = scene.getItems()[0];
-      console.log(s.source.name);
-      console.log('bounds', s.bounds);
-      console.log('position', s.position);
-      console.log('visible', s.visible);
-      console.log('width,height', s.source.width, s.source.height);
-
-      return scene;
+      /** 소스 입력 후 딜레이시간이 필요함 */
+      setTimeout(() => {
+        const outputWidth = videoSource.width;
+        const outputHeight = videoSource.height;
+        this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
+        this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
+        debugLog(`Output Size: ${outputWidth}x${outputHeight}`);
+        debugLog('Video source setup complete');
+      }, 500);
     }
-    throw new Error(`지원하지 않는 captureType입니다. (${option}은 지원하지 않습니다.)`);
+    return scene;
   }
 
   setupSources(scene: osn.IScene) {
@@ -254,6 +264,11 @@ export class ObsManager {
     // });
 
     this.setSetting('Output', 'RecTracks', parseInt('1'.repeat(currentTrack - 1), 2)); // Bit mask of used tracks: 1111 to use first four (from available six)
+    //
+    // setTimeout(() => {
+    //   console.log(scene.getItems().length);
+    //   console.log(scene.getItems()[0].source.width, scene.getItems()[0].source.height);
+    // }, 100);
   }
 
   startRecording() {
