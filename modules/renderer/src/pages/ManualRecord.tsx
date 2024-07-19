@@ -7,13 +7,27 @@ import Monitor from '@renderer/src/components/Monitor';
 type Props = {};
 
 export default function ManualRecord({}: Props) {
-  const { monitorList, selectedMonitor } = useObs({});
+  const { monitorList, selectedMonitor, start, stop, isRecording } = useObs({});
 
   return (
     <Container>
       <Title>수동 녹화</Title>
       <Title.Sub>화면 목록</Title.Sub>
-      <div className="flex gap-3">{monitorList?.map((m) => <Monitor key={m.id} data={m} />)}</div>
+      <div className="flex gap-3">
+        {monitorList?.map((m) => (
+          <Monitor
+            key={m.id}
+            data={m}
+            active={isRecording && selectedMonitor?.id === m.id}
+            onClickBtn={() => {
+              start({
+                captureType: 'monitor_capture',
+                monitorInfo: m
+              });
+            }}
+          />
+        ))}
+      </div>
       <Recorder />
     </Container>
   );

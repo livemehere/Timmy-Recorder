@@ -1,9 +1,10 @@
 import useInvoke from '@renderer/src/hooks/useInvoke';
-import type { MonitorInfo, MonitorScene, WindowInfo, WindowScene } from '@shared/shared-type';
+import type { MonitorInfo, MonitorScene, SceneOption, WindowInfo, WindowScene } from '@shared/shared-type';
 import { VIDEO_BIT_RATES } from '@shared/shared-const';
 import type { SettingsData } from '@main/Settings';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { IPerformanceState } from '@shared/shared-type';
+import { useGlobalAtom } from '@renderer/src/store/globalAtom';
 
 interface Option {
   interval?: {
@@ -13,7 +14,10 @@ interface Option {
 }
 
 export default function useObs(option?: Option) {
-  const [isRecording, setIsRecording] = useState(false);
+  const {
+    state: { isRecording },
+    setIsRecording
+  } = useGlobalAtom();
   const { data: currenSettings, reFetch: reFetchSetting } = useInvoke<SettingsData['obs']>('osn:getSettings', {
     initialRun: true
   });
@@ -91,12 +95,27 @@ export default function useObs(option?: Option) {
     return bitRateValues.find((bitRate) => bitRate.value === currenSettings.videoBitRate.value);
   }, [currenSettings, bitRateValues]);
 
-  const start = () => {
-    window.app.invoke('osn:start');
-    setIsRecording(true);
+  const start = (scene?: SceneOption) => {
+    if (isRecording) {
+      throw new Error('Already recording');
+    }
+    if (scene) {
+      invokeUpdateScene(scene).then(() => {
+        setTimeout(() => {
+          start();
+          setIsRecording(true);
+        }, 500);
+      });
+    } else {
+      window.app.invoke('osn:start');
+      setIsRecording(true);
+    }
   };
 
   const stop = () => {
+    if (!isRecording) {
+      throw new Error('Not recording');
+    }
     window.app.invoke('osn:stop');
     setIsRecording(false);
   };

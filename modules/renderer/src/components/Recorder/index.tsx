@@ -44,7 +44,7 @@ export default function Recorder() {
         </div>
       )}
       <section className="m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1">
-        <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={start}>
+        <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={() => start()}>
           녹화 시작
         </button>
         <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={stop}>
