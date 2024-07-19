@@ -3,27 +3,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headless
 import useObs from '@renderer/src/hooks/useObs';
 
 export default function Recorder() {
-  const {
-    isRecording,
-    performance,
-    start,
-    stop,
-    monitorList,
-    windowList,
-    windowIsFetching,
-    formats,
-    fpsValues,
-    bitRateValues,
-    selectedMonitor,
-    selectedWindow,
-    selectedFormat,
-    selectedFPS,
-    selectedBitRate,
-    invokeSetFormat,
-    invokeSetFps,
-    invokeUpdateScene,
-    invokeSetBitrate
-  } = useObs({
+  const { isRecording, performance, start, stop, monitorList, windowList, windowIsFetching, selectedMonitor, selectedWindow, invokeUpdateScene } = useObs({
     interval: {
       windowList: true,
       performance: true
@@ -71,54 +51,6 @@ export default function Recorder() {
         </button>
       </section>
       <section className="flex gap-6">
-        <Listbox
-          value={selectedFormat}
-          onChange={(value) => {
-            invokeSetFormat(value);
-          }}>
-          <div className="flex flex-col gap-2">
-            <ListboxButton>{selectedFormat}</ListboxButton>
-            <ListboxOptions>
-              {formats?.map((format) => (
-                <ListboxOption key={format} value={format} className="cursor-pointer">
-                  {format}
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
-          </div>
-        </Listbox>
-        <Listbox
-          value={selectedFPS}
-          onChange={(value) => {
-            invokeSetFps(value);
-          }}>
-          <div className="flex flex-col gap-2">
-            <ListboxButton>{selectedFPS}</ListboxButton>
-            <ListboxOptions>
-              {fpsValues?.map((fps) => (
-                <ListboxOption key={fps} value={fps} className="cursor-pointer">
-                  {fps}
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
-          </div>
-        </Listbox>
-        <Listbox
-          value={selectedBitRate}
-          onChange={(value) => {
-            invokeSetBitrate(value);
-          }}>
-          <div className="flex flex-col gap-2">
-            <ListboxButton>{selectedBitRate?.label}</ListboxButton>
-            <ListboxOptions>
-              {bitRateValues?.map((bitRate) => (
-                <ListboxOption key={bitRate.value} value={bitRate} className="cursor-pointer">
-                  {bitRate.label}
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
-          </div>
-        </Listbox>
         <Listbox
           value={selectedMonitor}
           onChange={(value) => {
