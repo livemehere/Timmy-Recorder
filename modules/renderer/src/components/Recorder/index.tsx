@@ -6,6 +6,7 @@ type Props = {};
 
 export default function Recorder({}: Props) {
   const {
+    performance,
     monitorList,
     windowList,
     windowIsFetching,
@@ -21,7 +22,14 @@ export default function Recorder({}: Props) {
     invokeSetFps,
     invokeUpdateScene,
     invokeSetBitrate
-  } = useObs();
+  } = useObs({
+    interval: {
+      windowList: true,
+      performance: true
+    }
+  });
+
+  console.log(performance);
 
   const start = () => {
     window.app.invoke('osn:start');
@@ -34,6 +42,16 @@ export default function Recorder({}: Props) {
   return (
     <div className={'flex flex-col items-center'}>
       <div>Recorder</div>
+      <div>
+        {performance && (
+          <div>
+            <p>CPU 사용량: {performance.CPU}%</p>
+            <p>메모리 사용량: {performance.memoryUsage.toFixed(0)}MB</p>
+            <p>FPS : {performance.frameRate.toFixed(0)}</p>
+            <p>디스크 남은 공간: {performance.diskSpaceAvailable}</p>
+          </div>
+        )}
+      </div>
       <section className={'m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1'}>
         <button className={'rounded-full px-2 py-1 text-sm hover:bg-neutral-800'} onClick={start}>
           녹화 시작
