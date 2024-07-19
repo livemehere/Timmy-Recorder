@@ -186,6 +186,11 @@ class Main {
       return this.osnManager.getMonitorList();
     });
 
+    // get thumbnail
+    ipcMain.handle('osn:getThumbnail', async (_, displayId: number) => {
+      return this.osnManager.getMonitorThumbnail(displayId);
+    });
+
     // update scene
     ipcMain.handle('osn:updateScene', async (_, option: SceneOption) => {
       this.osnManager.updateScene(option);

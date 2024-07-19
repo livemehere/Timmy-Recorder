@@ -11,6 +11,7 @@ export type WindowScene = {
 export type SceneOption = MonitorScene | WindowScene;
 
 export interface MonitorInfo {
+  id: number;
   monitorIndex: number;
   label: string;
   width: number;

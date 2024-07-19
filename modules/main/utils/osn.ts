@@ -1,6 +1,6 @@
 import * as osn from 'obs-studio-node';
 import path from 'path';
-import { app, screen } from 'electron';
+import { app, desktopCapturer, screen } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
 import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
@@ -73,6 +73,13 @@ export class ObsManager {
     this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
     this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
+
+    const screens = screen.getAllDisplays();
+    desktopCapturer.getSources({ types: ['screen'] }).then((res) => {
+      console.log(res);
+      console.log('---');
+      console.log(screens);
+    });
   }
 
   getSavedObsSettings(): SettingsData['obs'] {
@@ -174,6 +181,21 @@ export class ObsManager {
     return parameterSettings.values.map((value: any) => Object.values(value)[0]);
   }
 
+  async getMonitorThumbnail(displayId: number) {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: {
+        width: 1280,
+        height: 720
+      }
+    });
+    const display = sources.find((capture) => +capture.display_id === displayId);
+    if (!display) {
+      throw new Error('display not found');
+    }
+    return display.thumbnail.toDataURL();
+  }
+
   /** 호출 시점에서 녹화 가능한 모니터 목록을 반환합니다. */
   getMonitorList(): MonitorInfo[] {
     const screens = screen.getAllDisplays();
@@ -182,6 +204,7 @@ export class ObsManager {
       const aspectRatio = originWidth / originHeight;
 
       return {
+        id: screen.id,
         monitorIndex: index,
         label: `${screen.label}-${screen.id}`,
         width: originWidth,

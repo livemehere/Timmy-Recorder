@@ -11,7 +11,8 @@ export type OSN =
   | 'osn:setBitrate'
   | 'osn:getWindowList'
   | 'osn:getSettings'
-  | 'osn:getPerformance';
+  | 'osn:getPerformance'
+  | 'osn:getThumbnail';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN;
 export type TPreloadAPI = {
   invoke: <R = any>(channel: TInvokeChannel, ...args: any[]) => Promise<R>;

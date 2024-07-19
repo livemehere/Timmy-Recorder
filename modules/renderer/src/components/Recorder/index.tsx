@@ -1,6 +1,7 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 
 import useObs from '@renderer/src/hooks/useObs';
+import { useEffect } from 'react';
 
 export default function Recorder() {
   const { isRecording, performance, start, stop, monitorList, windowList, windowIsFetching, selectedMonitor, selectedWindow, invokeUpdateScene } = useObs({
@@ -11,24 +12,24 @@ export default function Recorder() {
   });
 
   const fcWindow = windowList?.find((win) => win.name.includes('FC') && win.name.includes('fczf'));
-  // const autoRecord = async () => {
-  //   if (fcWindow) {
-  //     if (!isRecording) {
-  //       await invokeUpdateScene({ captureType: 'window_capture', windowInfo: fcWindow });
-  //       setTimeout(() => {
-  //         start();
-  //       }, 500);
-  //     }
-  //   } else {
-  //     if (isRecording) {
-  //       stop();
-  //     }
-  //   }
-  // };
-  //
-  // useEffect(() => {
-  //   autoRecord();
-  // }, [fcWindow]);
+  const autoRecord = async () => {
+    if (fcWindow) {
+      if (!isRecording) {
+        await invokeUpdateScene({ captureType: 'window_capture', windowInfo: fcWindow });
+        setTimeout(() => {
+          start();
+        }, 500);
+      }
+    } else {
+      if (isRecording) {
+        stop();
+      }
+    }
+  };
+
+  useEffect(() => {
+    autoRecord();
+  }, [fcWindow]);
 
   return (
     <div className="flex flex-col items-center">
