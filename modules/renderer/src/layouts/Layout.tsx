@@ -54,7 +54,7 @@ const Layout: FC<Props> = ({ children }) => {
             ))}
           </SideBar.Menu>
         </SideBar>
-        <main className="ml-sidebar">{children}</main>
+        <main className="ml-sidebar flex-1">{children}</main>
       </div>
     </>
   );
