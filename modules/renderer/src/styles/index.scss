@@ -1,11 +1,17 @@
 @import './tailwind';
 @import './modal';
 @import './layout';
+@import './font';
 
 :root {
   --window-handle-height: 32px;
 }
 
 body {
+
   @apply bg-neutral-900 text-neutral-100 min-h-screen;
+}
+
+* { font-family: 'Spoqa Han Sans Neo', 'sans-serif';
+  font-weight: 400;
 }
