@@ -1,10 +1,13 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 import useDeepLink from '@renderer/src/hooks/useDeepLink';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiFillSetting } from 'react-icons/ai';
 import SideBar from '@renderer/src/layouts/ui';
 import { MdAutoFixHigh } from 'react-icons/md';
 import { FaRecordVinyl } from 'react-icons/fa';
+import { useModal } from 'async-modal-react';
+import RecordingOverlay from '@renderer/src/components/modals/RecordingOverlay';
+import { useGlobalAtom } from '@renderer/src/store/globalAtom';
 
 interface Props {
   children: ReactNode;
@@ -31,6 +34,21 @@ const MENU = [
 const Layout: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    state: { isRecording }
+  } = useGlobalAtom();
+  const { pushModal, closeAllModals } = useModal();
+
+  useEffect(() => {
+    pushModal(RecordingOverlay);
+    return;
+
+    if (isRecording) {
+      pushModal(RecordingOverlay);
+    } else {
+      closeAllModals();
+    }
+  }, [isRecording]);
 
   useDeepLink((url) => {
     navigate(url);
