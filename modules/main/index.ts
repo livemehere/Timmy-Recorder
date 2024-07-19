@@ -171,11 +171,6 @@ class Main {
       return FPS_VALUES;
     });
 
-    // get performance
-    ipcMain.handle('osn:getPerformance', async () => {
-      return this.osnManager.getPerformance();
-    });
-
     // get current obs settings
     ipcMain.handle('osn:getSettings', async () => {
       return this.osnManager.getSavedObsSettings();

@@ -3,16 +3,8 @@ import type { MonitorInfo, MonitorScene, WindowInfo, WindowScene } from '@shared
 import { VIDEO_BIT_RATES } from '@shared/shared-const';
 import type { SettingsData } from '@main/Settings';
 import { useMemo } from 'react';
-import { IPerformanceState } from '@shared/shared-type';
 
-interface Option {
-  interval?: {
-    windowList?: boolean;
-    performance?: boolean;
-  };
-}
-
-export default function useObs(option?: Option) {
+export default function useObs() {
   const { data: currenSettings, reFetch: reFetchSetting } = useInvoke<SettingsData['obs']>('osn:getSettings', {
     initialRun: true
   });
@@ -22,13 +14,8 @@ export default function useObs(option?: Option) {
   });
 
   const { data: windowList, isFetching: windowIsFetching } = useInvoke<WindowInfo[]>('osn:getWindowList', {
-    initialRun: true,
-    fetchTicker: option?.interval?.windowList ? 1000 : undefined
-  });
-
-  const { data: performance } = useInvoke<IPerformanceState>('osn:getPerformance', {
-    initialRun: true,
-    fetchTicker: option?.interval?.performance ? 1000 : undefined
+    initialRun: true
+    // fetchTicker: 3000
   });
 
   const { data: formats } = useInvoke<string[]>('osn:formatValues', {
@@ -58,7 +45,6 @@ export default function useObs(option?: Option) {
       reFetchSetting();
     }
   });
-
   const { invoke: invokeSetBitrate } = useInvoke<undefined>('osn:setBitrate', {
     onInvoke: () => {
       reFetchSetting();
@@ -91,7 +77,6 @@ export default function useObs(option?: Option) {
   }, [currenSettings, bitRateValues]);
 
   return {
-    performance,
     currenSettings,
     reFetchSetting,
     monitorList,

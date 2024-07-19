@@ -3,7 +3,7 @@ import path from 'path';
 import { app, screen, desktopCapturer } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
-import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
+import { MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { IListProperty } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
@@ -73,10 +73,6 @@ export class ObsManager {
     this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
     this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
-  }
-
-  getPerformance(): IPerformanceState {
-    return osn.NodeObs.OBS_API_getPerformanceStatistics();
   }
 
   getSavedObsSettings(): SettingsData['obs'] {
