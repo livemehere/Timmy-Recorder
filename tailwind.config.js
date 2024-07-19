@@ -5,7 +5,11 @@ const { nextui } = require('@nextui-org/react');
 module.exports = {
   content: ['./modules/renderer/**/*.{html,jsx,tsx}', './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {}
+    extend: {
+      spacing: {
+        sidebar: '250px'
+      }
+    }
   },
   darkMode: 'class',
   plugins: [nextui()]

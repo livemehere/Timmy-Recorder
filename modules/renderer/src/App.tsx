@@ -1,11 +1,13 @@
 import { HashRouter, Route, Routes } from 'react-router-dom';
-import Home from '@renderer/src/pages/Home';
+import ManualRecord from '@renderer/src/pages/ManualRecord';
 import { ModalProvider } from 'async-modal-react';
 import '@renderer/src/styles/index.scss';
 import Layout from '@renderer/src/layouts/Layout';
 import { DevTools } from 'jotai-devtools';
 import 'jotai-devtools/styles.css';
 import { NextUIProvider } from '@nextui-org/react';
+import Settings from '@renderer/src/pages/Settings';
+import AutoRecord from '@renderer/src/pages/AutoRecord';
 
 const App = () => {
   return (
@@ -15,7 +17,9 @@ const App = () => {
         <ModalProvider>
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<ManualRecord />} />
+              <Route path="/auto-record" element={<AutoRecord />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
           </Layout>
         </ModalProvider>
