@@ -1,5 +1,6 @@
 import { ModalProps } from 'async-modal-react/dist/types/modal';
 import useObs from '@renderer/src/hooks/useObs';
+import { Button } from '@nextui-org/react';
 
 export interface ExampleProps extends ModalProps {}
 
@@ -8,14 +9,21 @@ const RecordingOverlay = ({}: ExampleProps) => {
   const { stop } = useObs();
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center">
+      <div className="relative">
+        <div className="absolute inset-0 mb-4 h-10 w-10 animate-ping rounded-full bg-red-500"></div>
+        <div className="mb-4 h-10 w-10 rounded-full bg-red-500"></div>
+      </div>
       <h2>녹화중입니다</h2>
-      <button
+      <Button
+        className="mt-4"
+        color="primary"
+        variant="shadow"
         onClick={() => {
           stop();
         }}>
-        저장하기
-      </button>
+        녹화 종료 및 저장
+      </Button>
     </div>
   );
 };

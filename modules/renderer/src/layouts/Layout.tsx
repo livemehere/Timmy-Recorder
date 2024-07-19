@@ -40,11 +40,14 @@ const Layout: FC<Props> = ({ children }) => {
   const { pushModal, closeAllModals } = useModal();
 
   useEffect(() => {
-    pushModal(RecordingOverlay);
-    return;
-
     if (isRecording) {
-      pushModal(RecordingOverlay);
+      pushModal(
+        RecordingOverlay,
+        {},
+        {
+          onClickOutsideClose: false
+        }
+      );
     } else {
       closeAllModals();
     }
