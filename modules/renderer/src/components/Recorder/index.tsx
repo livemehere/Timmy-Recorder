@@ -1,11 +1,14 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 
 import useObs from '@renderer/src/hooks/useObs';
+import { useEffect } from 'react';
 
-type Props = {};
-
-export default function Recorder({}: Props) {
+export default function Recorder() {
   const {
+    isRecording,
+    performance,
+    start,
+    stop,
     monitorList,
     windowList,
     windowIsFetching,
@@ -21,38 +24,64 @@ export default function Recorder({}: Props) {
     invokeSetFps,
     invokeUpdateScene,
     invokeSetBitrate
-  } = useObs();
+  } = useObs({
+    interval: {
+      windowList: true,
+      performance: true
+    }
+  });
 
-  const start = () => {
-    window.app.invoke('osn:start');
+  const fcWindow = windowList?.find((win) => win.name.includes('FC') && win.name.includes('fczf'));
+  const autoRecord = async () => {
+    if (fcWindow) {
+      if (!isRecording) {
+        await invokeUpdateScene({ captureType: 'window_capture', windowInfo: fcWindow });
+        setTimeout(() => {
+          start();
+        }, 500);
+      }
+    } else {
+      if (isRecording) {
+        stop();
+      }
+    }
   };
 
-  const stop = () => {
-    window.app.invoke('osn:stop');
-  };
+  useEffect(() => {
+    autoRecord();
+  }, [fcWindow]);
 
   return (
-    <div className={'flex flex-col items-center'}>
-      <div>Recorder</div>
-      <section className={'m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1'}>
-        <button className={'rounded-full px-2 py-1 text-sm hover:bg-neutral-800'} onClick={start}>
+    <div className="flex flex-col items-center">
+      {fcWindow ? 'FC온라인 발견' : 'FC온라인 미발견'}
+      <div>Recorder {isRecording ? '녹화 중' : '대기 중'}</div>
+      {performance && (
+        <div>
+          <p>CPU 사용량: {performance.CPU}%</p>
+          <p>메모리 사용량: {performance.memoryUsage.toFixed(0)}MB</p>
+          <p>FPS : {performance.frameRate.toFixed(0)}</p>
+          <p>디스크 남은 공간: {performance.diskSpaceAvailable}</p>
+        </div>
+      )}
+      <section className="m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1">
+        <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={start}>
           녹화 시작
         </button>
-        <button className={'rounded-full px-2 py-1 text-sm hover:bg-neutral-800'} onClick={stop}>
+        <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={stop}>
           녹화 중지
         </button>
       </section>
-      <section className={'flex gap-6'}>
+      <section className="flex gap-6">
         <Listbox
           value={selectedFormat}
           onChange={(value) => {
             invokeSetFormat(value);
           }}>
-          <div className={'flex flex-col gap-2'}>
+          <div className="flex flex-col gap-2">
             <ListboxButton>{selectedFormat}</ListboxButton>
             <ListboxOptions>
               {formats?.map((format) => (
-                <ListboxOption key={format} value={format} className={'cursor-pointer'}>
+                <ListboxOption key={format} value={format} className="cursor-pointer">
                   {format}
                 </ListboxOption>
               ))}
@@ -64,11 +93,11 @@ export default function Recorder({}: Props) {
           onChange={(value) => {
             invokeSetFps(value);
           }}>
-          <div className={'flex flex-col gap-2'}>
+          <div className="flex flex-col gap-2">
             <ListboxButton>{selectedFPS}</ListboxButton>
             <ListboxOptions>
               {fpsValues?.map((fps) => (
-                <ListboxOption key={fps} value={fps} className={'cursor-pointer'}>
+                <ListboxOption key={fps} value={fps} className="cursor-pointer">
                   {fps}
                 </ListboxOption>
               ))}
@@ -80,11 +109,11 @@ export default function Recorder({}: Props) {
           onChange={(value) => {
             invokeSetBitrate(value);
           }}>
-          <div className={'flex flex-col gap-2'}>
+          <div className="flex flex-col gap-2">
             <ListboxButton>{selectedBitRate?.label}</ListboxButton>
             <ListboxOptions>
               {bitRateValues?.map((bitRate) => (
-                <ListboxOption key={bitRate.value} value={bitRate} className={'cursor-pointer'}>
+                <ListboxOption key={bitRate.value} value={bitRate} className="cursor-pointer">
                   {bitRate.label}
                 </ListboxOption>
               ))}
@@ -96,11 +125,11 @@ export default function Recorder({}: Props) {
           onChange={(value) => {
             invokeUpdateScene({ captureType: 'monitor_capture', monitorInfo: value });
           }}>
-          <div className={'flex flex-col gap-2'}>
+          <div className="flex flex-col gap-2">
             <ListboxButton>{selectedMonitor?.label || '모니터를 선택하세요'}</ListboxButton>
             <ListboxOptions>
               {monitorList?.map((monitor) => (
-                <ListboxOption key={monitor.monitorIndex} value={monitor} className={'cursor-pointer'}>
+                <ListboxOption key={monitor.monitorIndex} value={monitor} className="cursor-pointer">
                   {monitor.label}
                 </ListboxOption>
               ))}
@@ -112,13 +141,13 @@ export default function Recorder({}: Props) {
           onChange={(value) => {
             invokeUpdateScene({ captureType: 'window_capture', windowInfo: value });
           }}>
-          <div className={'flex flex-col gap-2'}>
+          <div className="flex flex-col gap-2">
             <ListboxButton>
               {selectedWindow?.name || '윈도우를 선택하세요'} {windowIsFetching && '...'}
             </ListboxButton>
             <ListboxOptions>
               {windowList?.map((window) => (
-                <ListboxOption key={window.value} value={window} className={'cursor-pointer'}>
+                <ListboxOption key={window.value} value={window} className="cursor-pointer">
                   {window.name}
                 </ListboxOption>
               ))}

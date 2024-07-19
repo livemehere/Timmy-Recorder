@@ -26,3 +26,18 @@ export interface WindowInfo {
   value: string;
   enabled: boolean;
 }
+
+/** OSN */
+export interface IPerformanceState {
+  CPU: number;
+  numberDroppedFrames: number;
+  percentageDroppedFrames: number;
+  streamingBandwidth: number;
+  streamingDataOutput: number;
+  recordingBandwidth: number;
+  recordingDataOutput: number;
+  frameRate: number;
+  averageTimeToRenderFrame: number;
+  memoryUsage: number;
+  diskSpaceAvailable: string;
+}

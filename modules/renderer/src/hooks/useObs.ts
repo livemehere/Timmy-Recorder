@@ -2,9 +2,18 @@ import useInvoke from '@renderer/src/hooks/useInvoke';
 import type { MonitorInfo, MonitorScene, WindowInfo, WindowScene } from '@shared/shared-type';
 import { VIDEO_BIT_RATES } from '@shared/shared-const';
 import type { SettingsData } from '@main/Settings';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { IPerformanceState } from '@shared/shared-type';
 
-export default function useObs() {
+interface Option {
+  interval?: {
+    windowList?: boolean;
+    performance?: boolean;
+  };
+}
+
+export default function useObs(option?: Option) {
+  const [isRecording, setIsRecording] = useState(false);
   const { data: currenSettings, reFetch: reFetchSetting } = useInvoke<SettingsData['obs']>('osn:getSettings', {
     initialRun: true
   });
@@ -14,8 +23,13 @@ export default function useObs() {
   });
 
   const { data: windowList, isFetching: windowIsFetching } = useInvoke<WindowInfo[]>('osn:getWindowList', {
-    initialRun: true
-    // fetchTicker: 3000
+    initialRun: true,
+    fetchTicker: option?.interval?.windowList ? 1000 : undefined
+  });
+
+  const { data: performance } = useInvoke<IPerformanceState>('osn:getPerformance', {
+    initialRun: true,
+    fetchTicker: option?.interval?.performance ? 1000 : undefined
   });
 
   const { data: formats } = useInvoke<string[]>('osn:formatValues', {
@@ -45,6 +59,7 @@ export default function useObs() {
       reFetchSetting();
     }
   });
+
   const { invoke: invokeSetBitrate } = useInvoke<undefined>('osn:setBitrate', {
     onInvoke: () => {
       reFetchSetting();
@@ -76,7 +91,21 @@ export default function useObs() {
     return bitRateValues.find((bitRate) => bitRate.value === currenSettings.videoBitRate.value);
   }, [currenSettings, bitRateValues]);
 
+  const start = () => {
+    window.app.invoke('osn:start');
+    setIsRecording(true);
+  };
+
+  const stop = () => {
+    window.app.invoke('osn:stop');
+    setIsRecording(false);
+  };
+
   return {
+    isRecording,
+    start,
+    stop,
+    performance,
     currenSettings,
     reFetchSetting,
     monitorList,

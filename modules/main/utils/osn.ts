@@ -1,15 +1,15 @@
 import * as osn from 'obs-studio-node';
 import path from 'path';
-import { app, screen, desktopCapturer } from 'electron';
+import { app, screen } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
-import { MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
+import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { IListProperty } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
 
 const HOST_NAME = 'Obj-Manager-Host';
-const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar','app.asar.unpacked');
+const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar', 'app.asar.unpacked');
 const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
 
 interface ObsManagerProps {
@@ -77,6 +77,10 @@ export class ObsManager {
 
   getSavedObsSettings(): SettingsData['obs'] {
     return settings.get('obs');
+  }
+
+  getPerformance(): IPerformanceState {
+    return osn.NodeObs.OBS_API_getPerformanceStatistics();
   }
 
   setOutputDirectory(path: string) {
@@ -259,7 +263,7 @@ export class ObsManager {
     osn.Global.setOutputSource(1, scene);
 
     this.setSetting('Output', 'Track1Name', 'Mixed: all sources');
-    let currentTrack = 2;
+    const currentTrack = 2;
 
     // getAudioDevices(byOS({ [OS.Windows]: 'wasapi_output_capture', [OS.Mac]: 'coreaudio_output_capture' }), 'desktop-audio').forEach(metadata => {
     //   if (metadata.device_id === 'default') return;
