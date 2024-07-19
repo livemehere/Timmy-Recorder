@@ -9,7 +9,7 @@ import { IListProperty } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
 
 const HOST_NAME = 'Obj-Manager-Host';
-const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node');
+const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar','app.asar.unpacked');
 const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
 
 interface ObsManagerProps {
