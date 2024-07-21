@@ -1,16 +1,18 @@
-import * as osn from 'obs-studio-node';
+// import * as osn from 'obs-studio-node';
 import path from 'path';
 import { app, desktopCapturer, screen } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
 import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
-import { IListProperty } from 'obs-studio-node/module';
+import { IListProperty, IScene } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
+import { isMac } from '@main/utils/byOS';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar', 'app.asar.unpacked');
 const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
+let osn: any;
 
 interface ObsManagerProps {
   debug?: boolean;
@@ -31,6 +33,10 @@ export class ObsManager {
     this.obsStudioNodePkgPath = props.obsStudioNodePkgPath || OBS_NODE_PKG_PATH;
     this.osnDataPath = props.osnDataPath || OBS_DATA_PATH;
     this.debug = props.debug || false;
+
+    if (!isMac()) {
+      osn = require('obs-studio-node');
+    }
 
     /** 최초 1회 기본값 세팅 */
     const savedObsSetting = settings.get('obs');
@@ -282,7 +288,7 @@ export class ObsManager {
     return scene;
   }
 
-  setupSources(scene: osn.IScene) {
+  setupSources(scene: IScene) {
     osn.Global.setOutputSource(1, scene);
 
     this.setSetting('Output', 'Track1Name', 'Mixed: all sources');

@@ -6,11 +6,12 @@ import { settings } from '@main/Settings';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { SceneOption } from '@shared/shared-type';
 import { ObsManager } from '@main/utils/osn';
+import { isMac } from '@main/utils/byOS';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
   mainWindow: MainWindow | null = null;
-  osnManager: ObsManager;
+  osnManager?: ObsManager;
 
   async start() {
     /* 하드웨어 가속 끄면 확실히 성능 안잡아먹음 (대신 앱이 빡셀때 버벅임) */
@@ -19,8 +20,10 @@ class Main {
     this.appSettings();
     await this.createMainWindow();
     this.handleInvoke();
-    this.osnManager = new ObsManager({ debug: true });
-    this.osnManager.init();
+    if (!isMac()) {
+      this.osnManager = new ObsManager({ debug: true });
+      this.osnManager.init();
+    }
   }
 
   appSettings() {
@@ -50,12 +53,12 @@ class Main {
     app.on('window-all-closed', () => {
       if (process.platform !== 'darwin') {
         app.quit();
-        this.osnManager.shutdown();
+        this.osnManager?.shutdown();
       }
     });
 
     app.on('before-quit', () => {
-      this.osnManager.shutdown();
+      this.osnManager?.shutdown();
     });
   }
 
@@ -148,11 +151,11 @@ class Main {
 
     /* OSN */
     ipcMain.handle('osn:start', async () => {
-      this.osnManager.startRecording();
+      this.osnManager?.startRecording();
     });
 
     ipcMain.handle('osn:stop', async () => {
-      this.osnManager.stopRecording();
+      this.osnManager?.stopRecording();
     });
 
     ipcMain.handle('osn:formatValues', async () => {
@@ -160,11 +163,11 @@ class Main {
     });
 
     ipcMain.handle('osn:setFormat', async (_, format: (typeof VIDEO_FORMATS)[number]) => {
-      this.osnManager.setFormat(format);
+      this.osnManager?.setFormat(format);
     });
 
     ipcMain.handle('osn:setFps', async (_, fps: (typeof FPS_VALUES)[number]) => {
-      this.osnManager.setFps(fps);
+      this.osnManager?.setFps(fps);
     });
 
     ipcMain.handle('osn:getFpsValues', async () => {
@@ -173,27 +176,27 @@ class Main {
 
     // get performance
     ipcMain.handle('osn:getPerformance', async () => {
-      return this.osnManager.getPerformance();
+      return this.osnManager?.getPerformance();
     });
 
     // get current obs settings
     ipcMain.handle('osn:getSettings', async () => {
-      return this.osnManager.getSavedObsSettings();
+      return this.osnManager?.getSavedObsSettings();
     });
 
     // get monitor list
     ipcMain.handle('osn:getMonitorList', async () => {
-      return this.osnManager.getMonitorList();
+      return this.osnManager?.getMonitorList();
     });
 
     // get thumbnail
     ipcMain.handle('osn:getThumbnail', async (_, displayId: number) => {
-      return this.osnManager.getMonitorThumbnail(displayId);
+      return this.osnManager?.getMonitorThumbnail(displayId);
     });
 
     // update scene
     ipcMain.handle('osn:updateScene', async (_, option: SceneOption) => {
-      this.osnManager.updateScene(option);
+      this.osnManager?.updateScene(option);
     });
 
     // bitrate list
@@ -203,12 +206,12 @@ class Main {
 
     // set bitrate
     ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]) => {
-      this.osnManager.setBitrate(bitrate);
+      this.osnManager?.setBitrate(bitrate);
     });
 
     // get window list
     ipcMain.handle('osn:getWindowList', async () => {
-      return this.osnManager.getWindowList();
+      return this.osnManager?.getWindowList();
     });
   }
 }
