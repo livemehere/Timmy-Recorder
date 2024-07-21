@@ -227,6 +227,7 @@ class Main {
       return this.osnManager?.getWindowList();
     });
 
+    // TODO: outputName 기반으로 'userData' 에 폴더 저장 하도록 구조 작업 필요
     // video editor
     ipcMain.handle('video-editor:save-frame', async (_, data: { frame: number; imageBase64: string; outputName: string }) => {
       const { frame, imageBase64, outputName } = data;
@@ -244,6 +245,7 @@ class Main {
       });
     });
 
+    // TODO: 마찬가지로 어차피 생성한 프레임 이미지 기반으로만 비디오 생성하기 때문에, outputName 기반으로 main 단에서 알아서 하도록 수정 필요
     // ffmpeg frames to video
     ipcMain.handle('video-editor:frames-to-video', async (_, data: FrameToVideoArgs) => {
       // const { imagePath, outputPath, fps, width, height } = data;
