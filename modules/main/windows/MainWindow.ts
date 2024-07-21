@@ -34,7 +34,8 @@ export class MainWindow {
       webPreferences: {
         devTools: DEBUG,
         preload: join(__dirname, 'preload.js'),
-        nodeIntegration: true
+        nodeIntegration: true,
+        allowRunningInsecureContent: true
       }
     });
 

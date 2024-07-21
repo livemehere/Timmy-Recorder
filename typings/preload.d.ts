@@ -13,9 +13,10 @@ export type OSN =
   | 'osn:getSettings'
   | 'osn:getPerformance'
   | 'osn:getThumbnail';
-export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN;
+export type VideoEdit = 'video-editor:save-frame';
+export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN | VideoEdit;
 export type TPreloadAPI = {
-  invoke: <R = any>(channel: TInvokeChannel, ...args: any[]) => Promise<R>;
+  invoke: <R = any, Args = any>(channel: TInvokeChannel, args: Args) => Promise<R>;
   on: (channel: string, callback: (...args: any[]) => void) => number;
   onMessage: (channel: string, callback: (...args: any[]) => void) => number;
   off: (id: number) => void;

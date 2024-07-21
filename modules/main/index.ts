@@ -1,4 +1,4 @@
-import { OpenDialogSyncOptions, app, dialog, ipcMain, shell, Notification, NotificationConstructorOptions, Menu, MenuItem } from 'electron';
+import { OpenDialogSyncOptions, app, dialog, ipcMain, shell, Notification, NotificationConstructorOptions, Menu, MenuItem, protocol } from 'electron';
 import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
@@ -7,6 +7,9 @@ import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const
 import { SceneOption } from '@shared/shared-type';
 import { ObsManager } from '@main/utils/osn';
 import { isMac } from '@main/utils/byOS';
+import { convertToMediaPath } from '@shared/path';
+import path from 'path';
+import * as fs from 'fs';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -29,6 +32,7 @@ class Main {
   appSettings() {
     this.singleInstance();
     this.handleDeepLink();
+    this.handleFileProtocol();
     this.setMenuAndLocalShortCut();
     this.setGlobalShortCut();
   }
@@ -59,6 +63,13 @@ class Main {
 
     app.on('before-quit', () => {
       this.osnManager?.shutdown();
+    });
+  }
+
+  handleFileProtocol() {
+    protocol.registerFileProtocol(DEEP_LINK_PROTOCOL, (request, callback) => {
+      const pathname = request.url.replace(convertToMediaPath(''), '');
+      callback(pathname);
     });
   }
 
@@ -212,6 +223,23 @@ class Main {
     // get window list
     ipcMain.handle('osn:getWindowList', async () => {
       return this.osnManager?.getWindowList();
+    });
+
+    // video editor
+    ipcMain.handle('video-editor:save-frame', async (_, data: { frame: number; imageBase64: string; outputName: string }) => {
+      const { frame, imageBase64, outputName } = data;
+      const dirPath = path.resolve(process.cwd(), 'temp', outputName);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+      }
+      const filePath = path.resolve(dirPath, `${outputName}-${frame}.png`);
+      fs.writeFile(filePath, imageBase64, 'base64', (err) => {
+        if (err) {
+          console.log(`Error writing file: ${err} frame: ${frame}`);
+        } else {
+          console.log(`File is written successfully: ${filePath}`);
+        }
+      });
     });
   }
 }
