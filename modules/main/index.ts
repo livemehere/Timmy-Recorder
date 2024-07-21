@@ -10,6 +10,8 @@ import { isMac } from '@main/utils/byOS';
 import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
+import { convertImageFramesToVideo } from '@main/utils/ffmpeg';
+import { FrameToVideoArgs } from '../../typings/preload';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -239,6 +241,18 @@ class Main {
         } else {
           console.log(`File is written successfully: ${filePath}`);
         }
+      });
+    });
+
+    // ffmpeg frames to video
+    ipcMain.handle('video-editor:frames-to-video', async (_, data: FrameToVideoArgs) => {
+      // const { imagePath, outputPath, fps, width, height } = data;
+      return convertImageFramesToVideo({
+        imagePath: path.resolve(process.cwd(), 'temp', 'test-output', 'test-output-%d.png'),
+        outputPath: path.resolve(process.cwd(), 'temp', 'output.mp4'),
+        fps: 60,
+        width: 1280,
+        height: 720
       });
     });
   }

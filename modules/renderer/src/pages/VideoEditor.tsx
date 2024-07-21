@@ -6,6 +6,7 @@ import type { OpenDialogSyncOptions } from 'electron';
 import { convertToMediaPath } from '@shared/path';
 import Konva from 'konva';
 import Button from '@renderer/src/components/ui/Button';
+import { FrameToVideoArgs } from '../../../../typings/preload';
 
 export default function VideoEditor() {
   const frameCanvas = useRef<HTMLCanvasElement>(document.createElement('canvas'));
@@ -132,10 +133,19 @@ export default function VideoEditor() {
       // setOutputFrames((prev) => [...prev, outputImageDataUrl]);
 
       const base64Data = outputImageDataUrl.replace(/^data:image\/png;base64,/, '');
-      window.app.invoke('video-editor:save-frame', { frame: i, imageBase64: base64Data, outputName: 'test-output' }).then(() => {
-        console.log(`${i} 프레임 이미지 추출 완료`);
-      });
+      await window.app.invoke('video-editor:save-frame', { frame: i, imageBase64: base64Data, outputName: 'test-output' });
     }
+    console.log('추출 완료');
+  };
+
+  const generateVideo = async () => {
+    const res = await window.app.invoke<string, FrameToVideoArgs>('video-editor:frames-to-video', {
+      outputPath: 'output.mp4',
+      imagePath: 'temp/test-output',
+      fps: 60,
+      width: 1280,
+      height: 720
+    });
   };
 
   const handleExtractCurrentFrame = () => {
@@ -170,6 +180,7 @@ export default function VideoEditor() {
         <div className="flex gap-2 py-2">
           <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
           <Button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </Button>
+          <Button onClick={generateVideo}>비디오 렌더링 시작</Button>
         </div>
         {/*<div>*/}
         {/*  <p>output frames</p>*/}
