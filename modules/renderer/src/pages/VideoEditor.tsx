@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OpenDialogSyncOptions } from 'electron';
 import { convertToMediaPath } from '@shared/path';
 import Konva from 'konva';
+import Button from '@renderer/src/components/ui/Button';
 
 export default function VideoEditor() {
   const frameCanvas = useRef<HTMLCanvasElement>(document.createElement('canvas'));
@@ -37,6 +38,7 @@ export default function VideoEditor() {
   useEffect(() => {
     const onLoad = () => {
       setInputDuration(videoEl.duration);
+      setVideoFrame(0);
       // videoEl.play();
     };
 
@@ -93,8 +95,7 @@ export default function VideoEditor() {
 
   const handleGetFrameImage = (frame: number) => {
     console.time('프레임 추출 시간');
-    // setVideoFrame(frame);
-    videoEl.currentTime = frameToSec(frame);
+    setVideoFrame(frame);
     const layer = imageRef.current?.getLayer();
     if (!layer) {
       console.log('레이어가 없습니다');
@@ -165,27 +166,30 @@ export default function VideoEditor() {
             setVideoFrame(frame);
           }}
         />
-        <button onClick={handleFindVideo}>찾기</button>
-        <div>
-          <button onClick={handleExtractCurrentFrame}>현재 프레임 출력하기</button>
-          <button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </button>
+        <Button onClick={handleFindVideo}>찾기</Button>
+        <div className="flex gap-2 py-2">
+          <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
+          <Button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </Button>
         </div>
-        <div>
-          <p>output frames</p>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-              gap: '10px'
-            }}>
-            {outputFrames.map((frame, i) => (
-              <img key={i} src={frame} alt="" />
-            ))}
+        {/*<div>*/}
+        {/*  <p>output frames</p>*/}
+        {/*  <div*/}
+        {/*    style={{*/}
+        {/*      display: 'grid',*/}
+        {/*      gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',*/}
+        {/*      gap: '10px'*/}
+        {/*    }}>*/}
+        {/*    {outputFrames.map((frame, i) => (*/}
+        {/*      <img key={i} src={frame} alt="" />*/}
+        {/*    ))}*/}
+        {/*  </div>*/}
+        {/*</div>*/}
+        {currentFrameImageUrl && (
+          <div className="fixed right-0 top-0 w-[150px]">
+            <p>Preview</p>
+            <img src={currentFrameImageUrl} alt="" />
           </div>
-        </div>
-        <p>Preview</p>
-        <img src={currentFrameImageUrl} alt="" />
-        <hr />
+        )}
         {/*<video ref={videoRef} src={videoPath} muted controls style={{ display: 'none' }}></video>*/}
       </div>
       <hr style={{ margin: '20px 0' }} />
