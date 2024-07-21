@@ -4,10 +4,8 @@ import Container from '../components/ui/Container';
 import useObs from '@renderer/src/hooks/useObs';
 import Monitor from '@renderer/src/components/Monitor';
 
-type Props = {};
-
-export default function ManualRecord({}: Props) {
-  const { monitorList, selectedMonitor, start, stop, isRecording } = useObs({});
+export default function ManualRecord() {
+  const { monitorList, selectedMonitor, start, isRecording } = useObs({});
 
   return (
     <Container>

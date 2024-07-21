@@ -5,6 +5,7 @@ import { AiFillSetting } from 'react-icons/ai';
 import SideBar from '@renderer/src/layouts/ui';
 import { MdAutoFixHigh } from 'react-icons/md';
 import { FaRecordVinyl } from 'react-icons/fa';
+import { CgEditFlipH } from 'react-icons/cg';
 import { useModal } from 'async-modal-react';
 import RecordingOverlay from '@renderer/src/components/modals/RecordingOverlay';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
@@ -23,6 +24,11 @@ const MENU = [
     title: '자동 녹화',
     path: '/auto-record',
     icon: <MdAutoFixHigh />
+  },
+  {
+    title: '편집',
+    path: '/video-editor',
+    icon: <CgEditFlipH />
   },
   {
     title: 'Settings',

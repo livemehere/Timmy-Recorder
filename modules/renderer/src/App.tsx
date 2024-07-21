@@ -8,6 +8,7 @@ import 'jotai-devtools/styles.css';
 import { NextUIProvider } from '@nextui-org/react';
 import Settings from '@renderer/src/pages/Settings';
 import AutoRecord from '@renderer/src/pages/AutoRecord';
+import VideoEditor from '@renderer/src/pages/VideoEditor';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<ManualRecord />} />
               <Route path="/auto-record" element={<AutoRecord />} />
+              <Route path="/video-editor" element={<VideoEditor />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </Layout>
