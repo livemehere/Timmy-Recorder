@@ -1,14 +1,24 @@
 import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import useInvoke from '@renderer/src/hooks/useInvoke';
 import { CategorySetting } from '@main/utils/osn/obs_types';
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { Selection } from '@react-types/shared/src/selection';
 import { Listbox, ListboxItem } from '@nextui-org/react';
 import { SetSettingArgs } from '../../../../../typings/preload';
+import cn from '@renderer/src/utils/cn';
 
 type Props = {
   categoryEnumKey: TSettingCategoryEnumKey;
 };
+
+interface CategoryContextType {
+  openSubCategory: string | undefined;
+  setOpenSubCategory: React.Dispatch<string | undefined>;
+}
+const CategoryContext = createContext<CategoryContextType>({
+  openSubCategory: undefined,
+  setOpenSubCategory: () => {}
+});
 
 export default function Category({ categoryEnumKey }: Props) {
   const { data } = useInvoke<CategorySetting>('osn:getSubCategoryAndParams', {
@@ -16,23 +26,42 @@ export default function Category({ categoryEnumKey }: Props) {
     initialRun: true
   });
   const categoryOptions = data?.data;
+  const [openSubCategory, setOpenSubCategory] = useState<string>();
   return (
-    <div>
-      <h3>카테고리 : {categoryEnumKey}</h3>
-      {categoryOptions?.map((sub, i) => <SubCategory key={i} subCategory={sub} categoryEnumKey={categoryEnumKey} />)}
-    </div>
+    <CategoryContext.Provider value={{ openSubCategory, setOpenSubCategory }}>
+      <div>
+        <div>서브 카테고리</div>
+        <div>{categoryOptions?.map((sub, i) => <SubCategory key={i} subCategory={sub} categoryEnumKey={categoryEnumKey} />)}</div>
+      </div>
+    </CategoryContext.Provider>
   );
 }
 
 function SubCategory({ subCategory, categoryEnumKey }: { subCategory: CategorySetting['data'][0]; categoryEnumKey: TSettingCategoryEnumKey }) {
+  const { setOpenSubCategory, openSubCategory } = useContext(CategoryContext);
+  const isSelected = openSubCategory === subCategory.nameSubCategory;
   return (
-    <div className="pl-4">
-      <div>서브 카테고리 : {subCategory.nameSubCategory}</div>
-      <div className="pl-4">
-        {subCategory.parameters.map((param, i) => (
-          <Param param={param} key={i} categoryEnumKey={categoryEnumKey} />
-        ))}
+    <div className="flex gap-20">
+      <div
+        className={cn('cursor-pointer ', { 'text-blue-500': isSelected })}
+        onClick={() => {
+          if (isSelected) {
+            setOpenSubCategory(undefined);
+          } else {
+            setOpenSubCategory(subCategory.nameSubCategory);
+          }
+        }}>
+        {subCategory.nameSubCategory}
       </div>
+      {isSelected && (
+        <div className="">
+          {subCategory.parameters.map((param, i) => (
+            <div key={i}>
+              <Param param={param} categoryEnumKey={categoryEnumKey} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -53,6 +82,7 @@ function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['
       <div>파라미터 : {param.name}</div>
       <div className="text-xs opacity-80">{param.description}</div>
       <Listbox
+        className="rounded bg-neutral-800 p-2"
         aria-label="Multiple selection example"
         variant="flat"
         disallowEmptySelection

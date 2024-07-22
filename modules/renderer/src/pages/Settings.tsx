@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Spacer } from '@nextui-org/react';
+import { Radio, RadioGroup, Spacer, Tab, Tabs } from '@nextui-org/react';
 import Title from '@renderer/src/components/ui/Title';
 import useObs from '@renderer/src/hooks/useObs';
 import Container from '@renderer/src/components/ui/Container';
@@ -65,7 +65,13 @@ export default function Settings({}: Props) {
         ))}
       </RadioGroup>
       <Title.Sub>상세 설정</Title.Sub>
-      {settingCategories?.map((category, i) => <Category key={i} categoryEnumKey={category} />)}
+      <Tabs>
+        {settingCategories?.map((category, i) => (
+          <Tab key={category} title={category}>
+            <Category key={i} categoryEnumKey={category} />
+          </Tab>
+        ))}
+      </Tabs>
     </Container>
   );
 }
