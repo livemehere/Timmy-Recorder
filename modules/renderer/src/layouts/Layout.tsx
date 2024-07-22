@@ -43,7 +43,8 @@ const Layout: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    state: { isRecording }
+    state: { isRecording, currentAutoRecordWindow },
+    setCurrentAutoRecordWindow
   } = useGlobalAtom();
   const { pushModal, closeAllModals } = useModal();
   const { performance } = useObs({
@@ -52,11 +53,14 @@ const Layout: FC<Props> = ({ children }) => {
     }
   });
 
+  const cancelAutoRecording = () => setCurrentAutoRecordWindow(undefined);
+
   useEffect(() => {
-    if (isRecording) {
+    if (isRecording || currentAutoRecordWindow) {
+      closeAllModals();
       pushModal(
         RecordingOverlay,
-        {},
+        { currentAutoRecordWindow, cancelAutoRecording },
         {
           onClickOutsideClose: false
         }
@@ -64,7 +68,7 @@ const Layout: FC<Props> = ({ children }) => {
     } else {
       closeAllModals();
     }
-  }, [isRecording]);
+  }, [isRecording, currentAutoRecordWindow]);
 
   useDeepLink((url) => {
     navigate(url);

@@ -7,11 +7,12 @@ export type SceneCardProps = {
   buttonLabel: string;
   onClickBtn: () => void;
   active?: boolean;
+  activeLabel?: React.ReactNode;
 } & HTMLAttributes<HTMLSpanElement>;
 
-export default function SceneCard({ thumbnail, label, buttonLabel, onClickBtn, active, ...props }: SceneCardProps) {
+export default function SceneCard({ thumbnail, label, buttonLabel, onClickBtn, active, activeLabel, ...props }: SceneCardProps) {
   return (
-    <Badge {...props} content={<div>녹화중</div>} color="danger" placement="top-right" isInvisible={!active}>
+    <Badge {...props} content={activeLabel ?? <div>녹화중</div>} color="danger" placement="top-right" isInvisible={!active}>
       <Card isFooterBlurred radius="lg" className="aspect-[16/9] w-[280px] rounded-md">
         <Skeleton isLoaded={!!thumbnail} className="h-full">
           <img alt={label} className="" src={thumbnail} />
