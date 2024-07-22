@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { convertImageFramesToVideo } from '@main/utils/ffmpeg';
 import { FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
+import debugLog from '@shared/debugLog';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -130,12 +131,6 @@ class Main {
   }
 
   handleInvoke() {
-    ipcMain.handle('test', async () => {
-      const res = shell.openPath('/Users');
-      console.log(res);
-      return 'test';
-    });
-
     ipcMain.handle('shell:openDir', async (_, path: string) => {
       shell.showItemInFolder(path);
       return 'test';
@@ -164,7 +159,6 @@ class Main {
     });
 
     /** OSN Setting */
-
     ipcMain.handle('osn:getSettingCategories', async () => {
       return this.osnManager?.getSettingCategories();
     });
@@ -173,8 +167,23 @@ class Main {
       return this.osnManager?.getCategorySettings(EOBSSettingsCategories[categoryEnumKey]);
     });
 
+    /** 자유도 높게 모든 OBS 설정을 set 하고 setting.json 에 저장합니다 */
     ipcMain.handle('osn:setSetting', async (_, { categoryEnumKey, parameter, value }: SetSettingArgs) => {
-      return this.osnManager?.setSetting(EOBSSettingsCategories[categoryEnumKey], parameter, value);
+      this.osnManager?.setSetting(EOBSSettingsCategories[categoryEnumKey], parameter, value);
+      let manualObsSettings = settings.get('manualObsSettings');
+      if (!manualObsSettings) {
+        manualObsSettings = [];
+      }
+      const foundIndex = manualObsSettings.findIndex((setting) => setting.categoryEnumKey === categoryEnumKey && setting.parameter === parameter);
+      const newVal = { categoryEnumKey, parameter, value };
+      if (foundIndex !== -1) {
+        manualObsSettings[foundIndex] = newVal;
+      } else {
+        manualObsSettings.push(newVal);
+      }
+      settings.set('manualObsSettings', manualObsSettings);
+      debugLog(`Save Manual OBS Setting`, `categoryEnumKey: ${categoryEnumKey}, parameter: ${parameter}, value: ${value})`);
+      return 'ok';
     });
 
     /* OSN */

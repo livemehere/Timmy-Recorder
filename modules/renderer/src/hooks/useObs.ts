@@ -5,7 +5,6 @@ import type { SettingsData } from '@main/Settings';
 import { useMemo } from 'react';
 import { IPerformanceState } from '@shared/shared-type';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
-import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
 
 type InitialRun = {
   monitorList?: boolean;
@@ -59,10 +58,6 @@ export default function useObs(option?: Option) {
 
   const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>('osn:getBitrateValues', {
     initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.bitRateValues)
-  });
-
-  const { data: settingCategories } = useInvoke<(keyof typeof EOBSSettingsCategories)[]>('osn:getSettingCategories', {
-    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.settingCategories)
   });
 
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat', {
@@ -158,7 +153,6 @@ export default function useObs(option?: Option) {
     invokeSetFormat,
     invokeSetFps,
     invokeUpdateScene,
-    invokeSetBitrate,
-    settingCategories
+    invokeSetBitrate
   };
 }

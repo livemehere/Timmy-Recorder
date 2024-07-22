@@ -5,6 +5,7 @@ import { createContext, useState } from 'react';
 import { Selection } from '@react-types/shared/src/selection';
 import { Listbox, ListboxItem, Switch, Tab, Tabs } from '@nextui-org/react';
 import { SetSettingArgs } from '../../../../../typings/preload';
+import useObsSettingSubCategory from '@renderer/src/hooks/queries/useObsSettingSubCategory';
 
 type Props = {
   categoryEnumKey: TSettingCategoryEnumKey;
@@ -20,12 +21,7 @@ const CategoryContext = createContext<CategoryContextType>({
 });
 
 export default function Category({ categoryEnumKey }: Props) {
-  const { data } = useInvoke<CategorySetting>('osn:getSubCategoryAndParams', {
-    args: categoryEnumKey,
-    initialRun: true
-  });
-
-  const categoryOptions = data?.data;
+  const { data: categoryOptions } = useObsSettingSubCategory(categoryEnumKey);
   const [openSubCategory, setOpenSubCategory] = useState<string>();
   return (
     <CategoryContext.Provider value={{ openSubCategory, setOpenSubCategory }}>

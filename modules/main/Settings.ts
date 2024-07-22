@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import debugLog from '@shared/debugLog';
 import { SceneOption } from '@shared/shared-type';
 import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
+import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 
 export interface SettingsData {
   bounds: {
@@ -19,6 +20,11 @@ export interface SettingsData {
     videoFps: (typeof FPS_VALUES)[number];
     latestSceneOption: SceneOption;
   };
+  manualObsSettings: {
+    categoryEnumKey: TSettingCategoryEnumKey;
+    parameter: string;
+    value: string | boolean;
+  }[];
 }
 
 type SettingsKey = keyof SettingsData;

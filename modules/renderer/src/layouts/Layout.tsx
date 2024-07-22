@@ -9,8 +9,8 @@ import { CgEditFlipH } from 'react-icons/cg';
 import { useModal } from 'async-modal-react';
 import RecordingOverlay from '@renderer/src/components/modals/RecordingOverlay';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
-import useObs from '@renderer/src/hooks/useObs';
 import Usage from '@renderer/src/components/Usage';
+import useObsPerformance from '@renderer/src/hooks/queries/useObsPerformance';
 
 interface Props {
   children: ReactNode;
@@ -47,11 +47,8 @@ const Layout: FC<Props> = ({ children }) => {
     setCurrentAutoRecordWindow
   } = useGlobalAtom();
   const { pushModal, closeAllModals } = useModal();
-  const { performance } = useObs({
-    interval: {
-      performance: true
-    }
-  });
+
+  const { data: performance } = useObsPerformance();
 
   const cancelAutoRecording = () => setCurrentAutoRecordWindow(undefined);
 

@@ -70,31 +70,40 @@ export class ObsManager {
     // 720p (7.5Mbps)
 
     /** OBS 기본 셋업 */
-    const savedObsSettings = settings.get('obs');
-    this.setSetting('Output', 'Mode', 'Advanced');
+    this.loadManualSettings();
+    // const savedObsSettings = settings.get('obs');
+    // this.setSetting('Output', 'Mode', 'Advanced');
 
-    console.dir(this.getCategorySettings(EOBSSettingsCategories.Video), { depth: 5 });
+    // console.dir(this.getCategorySettings(EOBSSettingsCategories.Video), { depth: 5 });
 
     /** GPU 엔코더 사용가능하면 사용. */
-    const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
-    console.log('@@ Encoders >> ', availableEncoders);
-    const gpuEncoder = availableEncoders.slice(-1)[0] as string | undefined;
-    this.setSetting('Output', 'RecEncoder', gpuEncoder || 'x264');
+    // const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
+    // console.log('@@ Encoders >> ', availableEncoders);
+    // const gpuEncoder = availableEncoders.slice(-1)[0] as string | undefined;
+    // this.setSetting('Output', 'RecEncoder', gpuEncoder || 'x264');
 
     /** 고품질 사용 가능하면 사용 (GPU 엔코더가 있어야 가능할 것임) */
     // const availableQualities = this.getAvailableValues('Output', 'Recording', 'Recgpu') as string[];
     // console.log(availableQualities);
     // const quality = availableQualities.includes('HQ') ? 'HQ' : 'Stream';
     // this.setSetting('Output', 'RecQuality', quality);
-    const categories = this.getSettingCategories();
-    console.log(this.getCategorySettings(EOBSSettingsCategories[categories[0]]));
+    // const categories = this.getSettingCategories();
+    // console.log(this.getCategorySettings(EOBSSettingsCategories[categories[0]]));
 
-    this.setSetting('Output', 'FilePath', savedObsSettings.outDir);
-    this.setSetting('Output', 'RecFormat', savedObsSettings.videoFormat);
-    this.setSetting('Output', 'VBitrate', savedObsSettings.videoBitRate.value); // 10 Mbps
-    this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
-    this.updateScene(savedObsSettings.latestSceneOption);
+    this.setSetting('Output', 'FilePath', app.getPath('desktop'));
+    // this.setSetting('Output', 'RecFormat', savedObsSettings.videoFormat);
+    // this.setSetting('Output', 'VBitrate', savedObsSettings.videoBitRate.value); // 10 Mbps
+    // this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
+    // this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
+  }
+
+  loadManualSettings() {
+    const manualObsSettings = settings.get('manualObsSettings');
+    manualObsSettings.forEach((setting) => {
+      this.setSetting(EOBSSettingsCategories[setting.categoryEnumKey], setting.parameter, setting.value);
+      debugLog(`Load Manual OBS Setting`, `categoryEnumKey: ${setting.categoryEnumKey}, parameter: ${setting.parameter}, value: ${setting.value}`);
+    });
   }
 
   getSavedObsSettings(): SettingsData['obs'] {
