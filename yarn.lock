@@ -3315,6 +3315,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.51.9":
+  version: 5.51.9
+  resolution: "@tanstack/query-core@npm:5.51.9"
+  checksum: 10c0/05ae00d0f4c80ea82991b7624551da543abbe8782b9b3910867d1d142076e2ac8892f50c37f2bde0bfa70ada3be1ad2f74472aece945a0237d2c86b729a02a1c
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.51.9":
+  version: 5.51.9
+  resolution: "@tanstack/query-devtools@npm:5.51.9"
+  checksum: 10c0/bc9d186ca88f3105c0ce6cc466d6e48f8ca4a199565e25d89952a05ea64c7dfde73289327ea7f24c92598a3d4faa7b5a0c515491053fe0d76818f208407714b7
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.51.11":
+  version: 5.51.11
+  resolution: "@tanstack/react-query-devtools@npm:5.51.11"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.51.9"
+  peerDependencies:
+    "@tanstack/react-query": ^5.51.11
+    react: ^18 || ^19
+  checksum: 10c0/67dc3771ed1093813544d1ee0bbe3003fbf0879a3f77e73bcb16e1fb6883b20c8554b65b92fd22bae7a5e06269d7d0f4f67522864d2fd2ad98b2f936fdb2f8d0
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.51.11":
+  version: 5.51.11
+  resolution: "@tanstack/react-query@npm:5.51.11"
+  dependencies:
+    "@tanstack/query-core": "npm:5.51.9"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 10c0/318aea36ffafc3e5123d970442c1358058137c069ef65dddcef87ea2406bc2f943f5e6da286df581885ba192b962b96eb785e57ef29366ee2178f18e39190f76
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-virtual@npm:^3.8.1":
   version: 3.8.3
   resolution: "@tanstack/react-virtual@npm:3.8.3"
@@ -3691,6 +3728,8 @@ __metadata:
   dependencies:
     "@headlessui/react": "npm:^2.1.2"
     "@nextui-org/react": "npm:^2.4.5"
+    "@tanstack/react-query": "npm:^5.51.11"
+    "@tanstack/react-query-devtools": "npm:^5.51.11"
     "@types/fluent-ffmpeg": "npm:^2"
     "@types/node": "npm:^20.11.30"
     "@types/react": "npm:^18.2.69"
