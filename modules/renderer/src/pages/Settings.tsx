@@ -16,7 +16,6 @@ export default function Settings({}: Props) {
       settingCategories: true
     }
   });
-  console.log(settingCategories);
   return (
     <Container>
       <Title>설정</Title>

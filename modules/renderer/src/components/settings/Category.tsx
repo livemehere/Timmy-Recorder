@@ -46,6 +46,7 @@ function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['
       console.log(`invoke setSetting : ${categoryEnumKey} ${param.name}`);
     }
   });
+  /** 타입이 불리언인 경우 처리하기 */
 
   return (
     <div className="my-2">
