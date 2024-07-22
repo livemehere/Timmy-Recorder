@@ -13,4 +13,18 @@ body {
 
 * { font-family: 'Spoqa Han Sans Neo', 'sans-serif';
   font-weight: 400;
+
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    @apply bg-neutral-700 rounded-full;
+  }
+
+  &::-webkit-scrollbar-track {
+      @apply bg-neutral-950;
+  }
 }
