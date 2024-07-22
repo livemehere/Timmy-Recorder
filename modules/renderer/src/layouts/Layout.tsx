@@ -81,7 +81,7 @@ const Layout: FC<Props> = ({ children }) => {
             ))}
           </SideBar.Menu>
         </SideBar>
-        <main className="ml-sidebar flex-1">{children}</main>
+        <main className="ml-sidebar mt-[var(--window-handle-height)] flex-1">{children}</main>
       </div>
     </>
   );
