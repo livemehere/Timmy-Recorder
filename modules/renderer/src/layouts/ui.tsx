@@ -2,18 +2,18 @@ import { ReactNode } from 'react';
 // import YoutubeLogo from '@renderer/src/assets/images/youtube.png';
 import cn from '@renderer/src/utils/cn';
 
-export default function SideBar({ children }: { children: ReactNode }) {
+export default function SideBar({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <aside className="w-sidebar fixed h-full bg-zinc-950">
+    <aside className={cn('w-sidebar fixed flex h-full flex-col bg-zinc-950', className)}>
       <div className="my-8 flex items-center justify-center">{/*<img src={YoutubeLogo} className="w-20" />*/}</div>
-      <nav className="">{children}</nav>
+      <nav className="flex flex-1 flex-col">{children}</nav>
     </aside>
   );
 }
 
-function Menu({ children, title }: { children: ReactNode; title: string }) {
+function Menu({ children, title, className }: { children: ReactNode; title: string; className?: string }) {
   return (
-    <div className="pl-6 pr-2">
+    <div className={cn('pl-6 pr-2', className)}>
       <h2 className="mb-4 text-sm font-light">{title}</h2>
       <ul className="flex flex-col gap-1">{children}</ul>
     </div>

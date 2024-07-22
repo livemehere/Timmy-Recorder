@@ -6,7 +6,14 @@ import Container from '@renderer/src/components/ui/Container';
 type Props = {};
 
 export default function Settings({}: Props) {
-  const { formats, invokeSetFormat, currenSettings, selectedFPS, invokeSetFps, fpsValues, bitRateValues, selectedBitRate, invokeSetBitrate } = useObs();
+  const { formats, invokeSetFormat, currenSettings, selectedFPS, invokeSetFps, fpsValues, bitRateValues, selectedBitRate, invokeSetBitrate } = useObs({
+    initialRun: {
+      currentSettings: true,
+      formats: true,
+      fpsValues: true,
+      bitRateValues: true
+    }
+  });
   return (
     <Container>
       <Title>설정</Title>

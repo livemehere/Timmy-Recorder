@@ -3,10 +3,9 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headless
 import useObs from '@renderer/src/hooks/useObs';
 
 export default function Recorder() {
-  const { isRecording, performance, start, stop, monitorList, windowList, windowIsFetching, selectedMonitor, selectedWindow, invokeUpdateScene } = useObs({
+  const { isRecording, start, stop, monitorList, windowList, windowIsFetching, selectedMonitor, selectedWindow, invokeUpdateScene } = useObs({
     interval: {
-      windowList: true,
-      performance: true
+      windowList: true
     }
   });
 
@@ -34,14 +33,6 @@ export default function Recorder() {
     <div className="flex flex-col items-center">
       {fcWindow ? 'FC온라인 발견' : 'FC온라인 미발견'}
       <div>Recorder {isRecording ? '녹화 중' : '대기 중'}</div>
-      {performance && (
-        <div>
-          <p>CPU 사용량: {performance.CPU}%</p>
-          <p>메모리 사용량: {performance.memoryUsage.toFixed(0)}MB</p>
-          <p>FPS : {performance.frameRate.toFixed(0)}</p>
-          <p>디스크 남은 공간: {performance.diskSpaceAvailable}</p>
-        </div>
-      )}
       <section className="m-auto mb-2 inline-flex justify-center gap-1 rounded-full bg-neutral-950 p-1">
         <button className="rounded-full px-2 py-1 text-sm hover:bg-neutral-800" onClick={() => start()}>
           녹화 시작

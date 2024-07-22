@@ -8,6 +8,10 @@ import Window from '@renderer/src/components/Window';
 
 export default function ManualRecord() {
   const { monitorList, selectedMonitor, start, isRecording, windowList, selectedWindow } = useObs({
+    initialRun: {
+      monitorList: true,
+      windowList: true
+    },
     interval: {
       windowList: true
     }

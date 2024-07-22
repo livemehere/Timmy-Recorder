@@ -6,7 +6,18 @@ import { useMemo } from 'react';
 import { IPerformanceState } from '@shared/shared-type';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
 
+type InitialRun = {
+  monitorList?: boolean;
+  windowList?: boolean;
+  performance?: boolean;
+  currentSettings?: boolean;
+  formats?: boolean;
+  fpsValues?: boolean;
+  bitRateValues?: boolean;
+};
+
 interface Option {
+  initialRun?: boolean | InitialRun;
   interval?: {
     windowList?: boolean;
     performance?: boolean;
@@ -19,33 +30,33 @@ export default function useObs(option?: Option) {
     setIsRecording
   } = useGlobalAtom();
   const { data: currenSettings, reFetch: reFetchSetting } = useInvoke<SettingsData['obs']>('osn:getSettings', {
-    initialRun: true
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.currentSettings)
   });
 
   const { data: monitorList } = useInvoke<MonitorInfo[]>('osn:getMonitorList', {
-    initialRun: true
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.monitorList)
   });
 
   const { data: windowList, isFetching: windowIsFetching } = useInvoke<WindowInfo[]>('osn:getWindowList', {
-    initialRun: true,
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.windowList),
     fetchTicker: option?.interval?.windowList ? 1000 : undefined
   });
 
   const { data: performance } = useInvoke<IPerformanceState>('osn:getPerformance', {
-    initialRun: true,
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.performance),
     fetchTicker: option?.interval?.performance ? 1000 : undefined
   });
 
   const { data: formats } = useInvoke<string[]>('osn:formatValues', {
-    initialRun: true
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.formats)
   });
 
   const { data: fpsValues } = useInvoke<number[]>('osn:getFpsValues', {
-    initialRun: true
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.fpsValues)
   });
 
   const { data: bitRateValues } = useInvoke<typeof VIDEO_BIT_RATES>('osn:getBitrateValues', {
-    initialRun: true
+    initialRun: option?.initialRun === true || (typeof option?.initialRun === 'object' && option.initialRun.bitRateValues)
   });
 
   const { invoke: invokeSetFormat } = useInvoke<undefined>('osn:setFormat', {
