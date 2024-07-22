@@ -65,13 +65,15 @@ export default function Settings({}: Props) {
         ))}
       </RadioGroup>
       <Title.Sub>상세 설정</Title.Sub>
-      <Tabs>
-        {settingCategories?.map((category, i) => (
-          <Tab key={category} title={category}>
-            <Category key={i} categoryEnumKey={category} />
-          </Tab>
-        ))}
-      </Tabs>
+      <div className="min-h-[1000px]">
+        <Tabs>
+          {settingCategories?.map((category, i) => (
+            <Tab key={category} title={category}>
+              <Category key={i} categoryEnumKey={category} />
+            </Tab>
+          ))}
+        </Tabs>
+      </div>
     </Container>
   );
 }
