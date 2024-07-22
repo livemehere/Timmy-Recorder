@@ -9,6 +9,8 @@ import { CgEditFlipH } from 'react-icons/cg';
 import { useModal } from 'async-modal-react';
 import RecordingOverlay from '@renderer/src/components/modals/RecordingOverlay';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
+import useObs from '@renderer/src/hooks/useObs';
+import Usage from '@renderer/src/components/Usage';
 
 interface Props {
   children: ReactNode;
@@ -44,6 +46,11 @@ const Layout: FC<Props> = ({ children }) => {
     state: { isRecording }
   } = useGlobalAtom();
   const { pushModal, closeAllModals } = useModal();
+  const { performance } = useObs({
+    interval: {
+      performance: true
+    }
+  });
 
   useEffect(() => {
     if (isRecording) {
@@ -79,6 +86,26 @@ const Layout: FC<Props> = ({ children }) => {
                 </Link>
               </SideBar.MenuItem>
             ))}
+          </SideBar.Menu>
+          <SideBar.Menu title="사용량" className="mb-4 mt-auto">
+            <Usage>
+              <Usage.Raw>
+                <div>CPU</div>
+                <Usage.Value>{performance?.CPU}%</Usage.Value>
+              </Usage.Raw>
+              <Usage.Raw>
+                <div>메모리</div>
+                <Usage.Value>{performance?.memoryUsage.toFixed(0)}MB</Usage.Value>
+              </Usage.Raw>
+              <Usage.Raw>
+                <div>FPS</div>
+                <Usage.Value>{performance?.frameRate.toFixed(0)}</Usage.Value>
+              </Usage.Raw>
+              <Usage.Raw>
+                <div>Usage</div>
+                <Usage.Value>{performance?.diskSpaceAvailable}</Usage.Value>
+              </Usage.Raw>
+            </Usage>
           </SideBar.Menu>
         </SideBar>
         <main className="ml-sidebar mt-[var(--window-handle-height)] flex-1">{children}</main>
