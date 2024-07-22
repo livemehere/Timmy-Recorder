@@ -1,4 +1,9 @@
+import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
+
 export type OSN =
+  | 'osn:getSettingCategories'
+  | 'osn:setSetting'
+  | 'osn:getSubCategoryAndParams'
   | 'osn:start'
   | 'osn:stop'
   | 'osn:formatValues'
@@ -30,4 +35,10 @@ export type FrameToVideoArgs = {
   fps: number;
   width: number;
   height: number;
+};
+
+export type SetSettingArgs = {
+  categoryEnumKey: TSettingCategoryEnumKey;
+  parameter: string;
+  value: string | boolean;
 };

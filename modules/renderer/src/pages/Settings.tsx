@@ -2,18 +2,21 @@ import { Radio, RadioGroup, Spacer } from '@nextui-org/react';
 import Title from '@renderer/src/components/ui/Title';
 import useObs from '@renderer/src/hooks/useObs';
 import Container from '@renderer/src/components/ui/Container';
+import Category from '@renderer/src/components/settings/Category';
 
 type Props = {};
 
 export default function Settings({}: Props) {
-  const { formats, invokeSetFormat, currenSettings, selectedFPS, invokeSetFps, fpsValues, bitRateValues, selectedBitRate, invokeSetBitrate } = useObs({
+  const { settingCategories, formats, invokeSetFormat, currenSettings, selectedFPS, invokeSetFps, fpsValues, bitRateValues, selectedBitRate, invokeSetBitrate } = useObs({
     initialRun: {
       currentSettings: true,
       formats: true,
       fpsValues: true,
-      bitRateValues: true
+      bitRateValues: true,
+      settingCategories: true
     }
   });
+  console.log(settingCategories);
   return (
     <Container>
       <Title>설정</Title>
@@ -62,6 +65,8 @@ export default function Settings({}: Props) {
           </Radio>
         ))}
       </RadioGroup>
+      <Title.Sub>상세 설정</Title.Sub>
+      {settingCategories?.map((category, i) => <Category key={i} categoryEnumKey={category} />)}
     </Container>
   );
 }

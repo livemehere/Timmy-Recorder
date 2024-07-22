@@ -11,7 +11,8 @@ import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
 import { convertImageFramesToVideo } from '@main/utils/ffmpeg';
-import { FrameToVideoArgs } from '../../typings/preload';
+import { FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
+import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -20,7 +21,7 @@ class Main {
 
   async start() {
     /* 하드웨어 가속 끄면 확실히 성능 안잡아먹음 (대신 앱이 빡셀때 버벅임) */
-    app.disableHardwareAcceleration();
+    // app.disableHardwareAcceleration();
     await app.whenReady();
     this.appSettings();
     await this.createMainWindow();
@@ -162,13 +163,27 @@ class Main {
       new Notification(options).show();
     });
 
+    /** OSN Setting */
+
+    ipcMain.handle('osn:getSettingCategories', async () => {
+      return this.osnManager?.getSettingCategories();
+    });
+
+    ipcMain.handle('osn:getSubCategoryAndParams', async (_, categoryEnumKey: TSettingCategoryEnumKey) => {
+      return this.osnManager?.getCategorySettings(EOBSSettingsCategories[categoryEnumKey]);
+    });
+
+    ipcMain.handle('osn:setSetting', async (_, { categoryEnumKey, parameter, value }: SetSettingArgs) => {
+      return this.osnManager?.setSetting(EOBSSettingsCategories[categoryEnumKey], parameter, value);
+    });
+
     /* OSN */
     ipcMain.handle('osn:start', async () => {
-      this.osnManager?.startRecording();
+      return this.osnManager?.startRecording();
     });
 
     ipcMain.handle('osn:stop', async () => {
-      this.osnManager?.stopRecording();
+      return this.osnManager?.stopRecording();
     });
 
     ipcMain.handle('osn:formatValues', async () => {
@@ -176,11 +191,11 @@ class Main {
     });
 
     ipcMain.handle('osn:setFormat', async (_, format: (typeof VIDEO_FORMATS)[number]) => {
-      this.osnManager?.setFormat(format);
+      return this.osnManager?.setFormat(format);
     });
 
     ipcMain.handle('osn:setFps', async (_, fps: (typeof FPS_VALUES)[number]) => {
-      this.osnManager?.setFps(fps);
+      return this.osnManager?.setFps(fps);
     });
 
     ipcMain.handle('osn:getFpsValues', async () => {
@@ -209,7 +224,7 @@ class Main {
 
     // update scene
     ipcMain.handle('osn:updateScene', async (_, option: SceneOption) => {
-      this.osnManager?.updateScene(option);
+      return this.osnManager?.updateScene(option);
     });
 
     // bitrate list
@@ -219,7 +234,7 @@ class Main {
 
     // set bitrate
     ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]) => {
-      this.osnManager?.setBitrate(bitrate);
+      return this.osnManager?.setBitrate(bitrate);
     });
 
     // get window list

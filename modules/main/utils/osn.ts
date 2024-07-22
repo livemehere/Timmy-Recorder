@@ -8,6 +8,8 @@ import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const
 import { IListProperty, IScene } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
 import { isMac } from '@main/utils/byOS';
+import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
+import { CategorySetting } from '@main/utils/osn/obs_types';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar', 'app.asar.unpacked');
@@ -66,26 +68,33 @@ export class ObsManager {
     debugLog('OBS Successfully Running');
 
     // 720p (7.5Mbps)
-    // const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
-    // console.log(availableEncoders);
 
     /** OBS 기본 셋업 */
     const savedObsSettings = settings.get('obs');
-    this.setSetting('Output', 'Mode', 'Simple');
-    this.setSetting('Output', 'RecEncoder', 'x264');
+    this.setSetting('Output', 'Mode', 'Advanced');
+
+    console.dir(this.getCategorySettings(EOBSSettingsCategories.Video), { depth: 5 });
+
+    /** GPU 엔코더 사용가능하면 사용. */
+    const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
+    console.log('@@ Encoders >> ', availableEncoders);
+    const gpuEncoder = availableEncoders.slice(-1)[0] as string | undefined;
+    this.setSetting('Output', 'RecEncoder', gpuEncoder || 'x264');
+
+    /** 고품질 사용 가능하면 사용 (GPU 엔코더가 있어야 가능할 것임) */
+    // const availableQualities = this.getAvailableValues('Output', 'Recording', 'Recgpu') as string[];
+    // console.log(availableQualities);
+    // const quality = availableQualities.includes('HQ') ? 'HQ' : 'Stream';
+    // this.setSetting('Output', 'RecQuality', quality);
+    const categories = this.getSettingCategories();
+    console.log(this.getCategorySettings(EOBSSettingsCategories[categories[0]]));
+
     this.setSetting('Output', 'FilePath', savedObsSettings.outDir);
     this.setSetting('Output', 'RecFormat', savedObsSettings.videoFormat);
     this.setSetting('Output', 'VBitrate', savedObsSettings.videoBitRate.value); // 10 Mbps
     this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
     this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
-
-    const screens = screen.getAllDisplays();
-    desktopCapturer.getSources({ types: ['screen'] }).then((res) => {
-      console.log(res);
-      console.log('---');
-      console.log(screens);
-    });
   }
 
   getSavedObsSettings(): SettingsData['obs'] {
@@ -144,7 +153,7 @@ export class ObsManager {
     }
   }
 
-  private setSetting(category: string, parameter: string, value: any) {
+  setSetting(category: string, parameter: string, value: any) {
     let oldValue;
     // Getting settings container
     const settings = osn.NodeObs.OBS_settings_getSettings(category).data;
@@ -165,6 +174,16 @@ export class ObsManager {
     debugLog(`>> Setting ${category}.${parameter} changed from ${oldValue} to ${value}`);
   }
 
+  /** 설정 가능한 세팅 카테고리 배열을 반환합니다. */
+  getSettingCategories() {
+    return Object.keys(EOBSSettingsCategories) as (keyof typeof EOBSSettingsCategories)[];
+  }
+
+  /** 큰 카테고리의 서브카테고리 및 각 사용가능한 값의 배열을 반환합니다. */
+  getCategorySettings(category: EOBSSettingsCategories): CategorySetting {
+    return osn.NodeObs.OBS_settings_getSettings(category) ?? [];
+  }
+
   private getAvailableValues(category: string, subcategory: string, parameter: any) {
     const categorySettings = osn.NodeObs.OBS_settings_getSettings(category).data;
     if (!categorySettings) {
@@ -177,7 +196,6 @@ export class ObsManager {
       console.warn(`There is no subcategory ${subcategory} for OBS settings category ${category}`);
       return [];
     }
-
     const parameterSettings = subcategorySettings.parameters.find((param: any) => param.name === parameter);
     if (!parameterSettings) {
       console.warn(`There is no parameter ${parameter} for OBS settings category ${category}.${subcategory}`);
@@ -294,15 +312,15 @@ export class ObsManager {
     this.setSetting('Output', 'Track1Name', 'Mixed: all sources');
     const currentTrack = 2;
 
-    // getAudioDevices(byOS({ [OS.Windows]: 'wasapi_output_capture', [OS.Mac]: 'coreaudio_output_capture' }), 'desktop-audio').forEach(metadata => {
+    // this.getAudioDevices('wasapi_output_capture', 'desktop-audio').forEach((metadata: any) => {
     //   if (metadata.device_id === 'default') return;
-    //   const source = osn.InputFactory.create(byOS({ [OS.Windows]: 'wasapi_output_capture', [OS.Mac]: 'coreaudio_output_capture' }), 'desktop-audio', { device_id: metadata.device_id });
-    //   setSetting('Output', `Track${currentTrack}Name`, metadata.name);
-    //   source.audioMixers = 1 | (1 << currentTrack-1); // Bit mask to output to only tracks 1 and current track
+    //   const source = osn.InputFactory.create('wasapi_output_capture', 'desktop-audio', { device_id: metadata.device_id });
+    //   this.setSetting('Output', `Track${currentTrack}Name`, metadata.name);
+    //   source.audioMixers = 1 | (1 << (currentTrack - 1)); // Bit mask to output to only tracks 1 and current track
     //   osn.Global.setOutputSource(currentTrack, source);
     //   currentTrack++;
     // });
-    //
+
     // getAudioDevices(byOS({ [OS.Windows]: 'wasapi_input_capture', [OS.Mac]: 'coreaudio_input_capture' }), 'mic-audio').forEach(metadata => {
     //   if (metadata.device_id === 'default') return;
     //   const source = osn.InputFactory.create(byOS({ [OS.Windows]: 'wasapi_input_capture', [OS.Mac]: 'coreaudio_input_capture' }), 'mic-audio', { device_id: metadata.device_id });
@@ -318,6 +336,15 @@ export class ObsManager {
     //   console.log(scene.getItems().length);
     //   console.log(scene.getItems()[0].source.width, scene.getItems()[0].source.height);
     // }, 100);
+  }
+
+  getAudioDevices(type: string, subtype: string) {
+    const dummyDevice = osn.InputFactory.create(type, subtype, { device_id: 'does_not_exist' });
+    const devices = dummyDevice.properties.get('device_id').details.items.map(({ name, value }: { name: string; value: string }) => {
+      return { device_id: value, name };
+    });
+    dummyDevice.release();
+    return devices;
   }
 
   startRecording() {

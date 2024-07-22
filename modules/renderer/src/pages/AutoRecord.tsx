@@ -1,4 +1,3 @@
-import Recorder from '@renderer/src/components/Recorder';
 import Container from '../components/ui/Container';
 import Title from '@renderer/src/components/ui/Title';
 import AutoRecordWindow from '@renderer/src/components/AutoRecordWindow';
@@ -59,7 +58,6 @@ export default function AutoRecord() {
           />
         ))}
       </div>
-      <Recorder />
     </Container>
   );
 }

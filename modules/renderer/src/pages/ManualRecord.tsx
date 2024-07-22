@@ -1,4 +1,3 @@
-import Recorder from '@renderer/src/components/Recorder';
 import Title from '@renderer/src/components/ui/Title';
 import Container from '../components/ui/Container';
 import useObs from '@renderer/src/hooks/useObs';
@@ -53,7 +52,6 @@ export default function ManualRecord() {
           />
         ))}
       </div>
-      <Recorder />
     </Container>
   );
 }
