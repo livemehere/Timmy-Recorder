@@ -3,10 +3,10 @@ export interface CategorySetting {
     nameSubCategory: string;
     parameters: {
       name: string;
-      type: string;
+      type: string | 'OBS_PROPERTY_BOOL';
       description: string;
       subType: string;
-      currentValue: string;
+      currentValue: string | boolean;
       values: {
         [key: string]: string;
       }[];
