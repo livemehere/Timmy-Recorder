@@ -1,4 +1,3 @@
-// import * as osn from 'obs-studio-node';
 import path from 'path';
 import { app, desktopCapturer, screen } from 'electron';
 import { uid } from 'uid';
@@ -9,10 +8,11 @@ import { settings, SettingsData } from '@main/Settings';
 import { isMac } from '@main/utils/byOS';
 import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
 import { CategorySetting, ObsOutputSignalInfo } from '@main/utils/osn/obs_types';
+import resolveUnpackedNodeModulePath from '@main/utils/resolveUnpackedNodeModulePath';
 
 const HOST_NAME = 'Obj-Manager-Host';
-const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar', 'app.asar.unpacked');
-const OBS_DATA_PATH = path.join(process.cwd(), 'osn-data');
+const OBS_NODE_PKG_PATH = resolveUnpackedNodeModulePath('obs-studio-node');
+const OBS_DATA_PATH = path.join(app.getPath('userData'), 'osn-data');
 let osn: any;
 
 interface ObsManagerProps {
