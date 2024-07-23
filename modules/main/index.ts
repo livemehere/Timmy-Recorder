@@ -1,4 +1,4 @@
-import { OpenDialogSyncOptions, app, dialog, ipcMain, shell, Notification, NotificationConstructorOptions, Menu, MenuItem, protocol } from 'electron';
+import { screen, OpenDialogSyncOptions, app, dialog, ipcMain, shell, Notification, NotificationConstructorOptions, Menu, MenuItem, protocol } from 'electron';
 import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
@@ -122,9 +122,19 @@ class Main {
   }
 
   async createMainWindow() {
+    const mainDisplayBounds = screen.getPrimaryDisplay().bounds;
+    const defaultSize = {
+      width: 1920,
+      height: 1080
+    };
+    const center = {
+      x: mainDisplayBounds.x + mainDisplayBounds.width / 2 - defaultSize.width / 2,
+      y: mainDisplayBounds.y + mainDisplayBounds.height / 2 - defaultSize.height / 2
+    };
     const mainWindow = new MainWindow({
-      bounds: settings.get('bounds')
+      bounds: settings.get('bounds') || { width: defaultSize.width, height: defaultSize.height, x: center.x, y: center.y }
     });
+
     this.mainWindow = mainWindow;
     mainWindow.get().on('resized', () => {
       settings.set('bounds', mainWindow.get().getBounds());
@@ -202,11 +212,6 @@ class Main {
     // get performance
     ipcMain.handle('osn:getPerformance', async () => {
       return this.osnManager?.getPerformance();
-    });
-
-    // get current obs settings
-    ipcMain.handle('osn:getSettings', async () => {
-      return this.osnManager?.getSavedObsSettings();
     });
 
     // get monitor list

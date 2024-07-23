@@ -23,7 +23,7 @@ export interface SettingsData {
   manualObsSettings: {
     categoryEnumKey: TSettingCategoryEnumKey;
     parameter: string;
-    value: string | boolean;
+    value: string | boolean | number;
   }[];
 }
 
@@ -52,7 +52,7 @@ class Settings {
     writeFileSync(this.path, JSON.stringify(this.data));
   }
 
-  get<K extends SettingsKey>(key: K): SettingsValue<K> {
+  get<K extends SettingsKey>(key: K): SettingsValue<K> | undefined {
     return this.data[key];
   }
 }

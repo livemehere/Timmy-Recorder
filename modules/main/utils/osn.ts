@@ -74,65 +74,76 @@ export class ObsManager {
       this.onSignal?.(signalInfo);
     });
 
-    // 720p (7.5Mbps)
-
     /** OBS 기본 셋업 */
     this.loadManualSettings();
-    // const savedObsSettings = settings.get('obs');
-    // this.setSetting('Output', 'Mode', 'Advanced');
-
-    // console.dir(this.getCategorySettings(EOBSSettingsCategories.Video), { depth: 5 });
-
-    /** GPU 엔코더 사용가능하면 사용. */
-    // const availableEncoders = this.getAvailableValues('Output', 'Recording', 'RecEncoder');
-    // console.log('@@ Encoders >> ', availableEncoders);
-    // const gpuEncoder = availableEncoders.slice(-1)[0] as string | undefined;
-    // this.setSetting('Output', 'RecEncoder', gpuEncoder || 'x264');
-
-    /** 고품질 사용 가능하면 사용 (GPU 엔코더가 있어야 가능할 것임) */
-    // const availableQualities = this.getAvailableValues('Output', 'Recording', 'Recgpu') as string[];
-    // console.log(availableQualities);
-    // const quality = availableQualities.includes('HQ') ? 'HQ' : 'Stream';
-    // this.setSetting('Output', 'RecQuality', quality);
-    // const categories = this.getSettingCategories();
-    // console.log(this.getCategorySettings(EOBSSettingsCategories[categories[0]]));
-
-    this.setSetting('Output', 'FilePath', app.getPath('desktop'));
-    // this.setSetting('Output', 'RecFormat', savedObsSettings.videoFormat);
-    // this.setSetting('Output', 'VBitrate', savedObsSettings.videoBitRate.value); // 10 Mbps
-    // this.setSetting('Video', 'FPSCommon', savedObsSettings.videoFps);
-    // this.updateScene(savedObsSettings.latestSceneOption);
     this.isInit = true;
   }
 
   loadManualSettings() {
     const manualObsSettings = settings.get('manualObsSettings');
-    manualObsSettings.forEach((setting) => {
-      this.setSetting(EOBSSettingsCategories[setting.categoryEnumKey], setting.parameter, setting.value);
-      debugLog(`@@@@@ Load Manual OBS Setting`, `categoryEnumKey: ${setting.categoryEnumKey}, parameter: ${setting.parameter}, value: ${setting.value}`);
-    });
-  }
+    if (!manualObsSettings) {
+      const defaultSettings: SettingsData['manualObsSettings'] = [
+        {
+          categoryEnumKey: 'Output',
+          parameter: 'FilePath',
+          value: app.getPath('desktop')
+        },
+        {
+          categoryEnumKey: 'Output',
+          parameter: 'Mode',
+          value: 'Simple'
+        },
+        {
+          categoryEnumKey: 'Output',
+          parameter: 'RecQuality',
+          value: 'Stream'
+        },
+        {
+          categoryEnumKey: 'Output',
+          parameter: 'VBitrate',
+          value: 5000
+        },
+        {
+          categoryEnumKey: 'Video',
+          parameter: 'FPSCommon',
+          value: 60
+        },
+        {
+          categoryEnumKey: 'Output',
+          parameter: 'RecFormat',
+          value: 'mp4'
+        }
+      ];
+      /** GPU 사용이 가능하다면 사용 or CPU 사용 */
+      const availableEncoders = this.getAvailableValues('Output', 'Streaming', 'StreamEncoder');
+      debugLog('@@ Available Encoders >> ', availableEncoders);
+      const gpuEncoder = availableEncoders.slice(-1)[0] as string | undefined;
+      defaultSettings.push({
+        categoryEnumKey: 'Output',
+        parameter: 'StreamEncoder',
+        value: gpuEncoder || 'x264'
+      });
 
-  getSavedObsSettings(): SettingsData['obs'] {
-    return settings.get('obs');
+      debugLog('@@@@@ Load Default OBS Setting');
+      defaultSettings.forEach((setting) => {
+        this.setSetting(EOBSSettingsCategories[setting.categoryEnumKey], setting.parameter, setting.value);
+      });
+      settings.set('manualObsSettings', defaultSettings);
+    } else {
+      debugLog('@@@@@ Load Saved OBS Setting');
+      manualObsSettings.forEach((setting) => {
+        this.setSetting(EOBSSettingsCategories[setting.categoryEnumKey], setting.parameter, setting.value);
+      });
+    }
   }
 
   getPerformance(): IPerformanceState {
     return osn.NodeObs.OBS_API_getPerformanceStatistics();
   }
 
-  setOutputDirectory(path: string) {
-    if (!this.isInit) {
-      throw new Error('OBS is not initialized');
-    }
-    this.setSetting('Output', 'FilePath', path);
-    settings.set('obs', { ...settings.get('obs'), outDir: path });
-  }
-
   updateScene(option: SceneOption) {
     const scene = this.setupScene(option);
     this.setupSources(scene);
-    settings.set('obs', { ...settings.get('obs'), latestSceneOption: option });
   }
 
   shutdown() {
