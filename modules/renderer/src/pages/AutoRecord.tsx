@@ -5,29 +5,22 @@ import useObs from '@renderer/src/hooks/useObs';
 import { autoRecordAbleWindows } from '@renderer/src/utils/autoRecord';
 import { useEffect } from 'react';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
+import useWindowList from '@renderer/src/hooks/queries/useWindowList';
 
 export default function AutoRecord() {
   const {
     state: { currentAutoRecordWindow },
+    isRecording,
     setCurrentAutoRecordWindow
   } = useGlobalAtom();
-  const { start, stop, windowList, isRecording, invokeUpdateScene } = useObs({
-    initialRun: {
-      windowList: true
-    },
-    interval: {
-      windowList: true
-    }
-  });
+  const { start, stop } = useObs();
+  const { data: windowList } = useWindowList();
 
   const targetWindow = windowList?.find((win) => currentAutoRecordWindow?.matcher(win));
   const autoRecord = async () => {
     if (targetWindow) {
       if (!isRecording) {
-        await invokeUpdateScene({ captureType: 'window_capture', windowInfo: targetWindow });
-        setTimeout(() => {
-          start();
-        }, 500);
+        start({ captureType: 'window_capture', windowInfo: targetWindow });
       }
     } else {
       if (isRecording) {

@@ -20,9 +20,10 @@ export type OSN =
   | 'osn:getThumbnail';
 export type VideoEdit = 'video-editor:save-frame' | 'video-editor:frames-to-video';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN | VideoEdit;
+export type TOnChannel = 'osn:signal';
 export type TPreloadAPI = {
   invoke: <R = any, Args = any>(channel: TInvokeChannel, args?: Args) => Promise<R>;
-  on: (channel: string, callback: (...args: any[]) => void) => number;
+  on: <R = any>(channel: TOnChannel, callback: (res: R) => void) => number;
   onMessage: (channel: string, callback: (...args: any[]) => void) => number;
   off: (id: number) => void;
 };

@@ -17,3 +17,10 @@ export interface CategorySetting {
   }[];
   type: number;
 }
+
+export interface ObsOutputSignalInfo {
+  type: string | 'recording';
+  signal: string | 'start' | 'stop';
+  code: number;
+  error: string;
+}

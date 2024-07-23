@@ -53,6 +53,7 @@ function SubCategory({ subCategory, categoryEnumKey }: { subCategory: CategorySe
 }
 
 function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['parameters'][0]; categoryEnumKey: TSettingCategoryEnumKey }) {
+  const [directInput, setDirectInput] = useState('');
   const invalidate = useInvalidateAllSubCategory();
   const { invoke } = useInvoke<void, SetSettingArgs>('osn:setSetting', {
     initialRun: false,
@@ -73,6 +74,21 @@ function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['
     <div className="my-2">
       <div>파라미터 : {param.name}</div>
       <div className="mb-4 text-xs opacity-80">{param.description}</div>
+      <div className="text-sm">
+        <span className="mr-2">수동입력</span>
+        <input type="text" value={directInput} onChange={(e) => setDirectInput(e.target.value)} />
+        <button
+          className="ml-2 border-1 px-2 py-0.5 hover:bg-neutral-50/20"
+          onClick={() => {
+            invoke<SetSettingArgs>({
+              categoryEnumKey: categoryEnumKey,
+              parameter: param.name,
+              value: directInput === 'true' ? true : directInput === 'false' ? false : directInput
+            });
+          }}>
+          SET
+        </button>
+      </div>
       <div className="mb-3 text-sm text-blue-500">현제 값 : {currentValueString}</div>
       {isBooleanValue ? (
         <div>

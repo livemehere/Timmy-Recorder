@@ -4,17 +4,16 @@ import useObs from '@renderer/src/hooks/useObs';
 import Monitor from '@renderer/src/components/Monitor';
 import cn from '@renderer/src/utils/cn';
 import Window from '@renderer/src/components/Window';
+import { useGlobalAtom } from '@renderer/src/store/globalAtom';
+import useWindowList from '@renderer/src/hooks/queries/useWindowList';
+import useMonitorList from '@renderer/src/hooks/queries/useMonitorList';
 
 export default function ManualRecord() {
-  const { monitorList, selectedMonitor, start, isRecording, windowList, selectedWindow } = useObs({
-    initialRun: {
-      monitorList: true,
-      windowList: true
-    },
-    interval: {
-      windowList: true
-    }
-  });
+  const { isRecording, selectedWindowInfo, selectedMonitorInfo } = useGlobalAtom();
+  const { start } = useObs();
+
+  const { data: windowList } = useWindowList();
+  const { data: monitorList } = useMonitorList();
 
   return (
     <Container>
@@ -26,7 +25,7 @@ export default function ManualRecord() {
             className={cn('opacity-90')}
             key={m.id}
             data={m}
-            active={isRecording && selectedMonitor?.id === m.id}
+            active={isRecording && selectedMonitorInfo?.id === m.id}
             onClickBtn={() => {
               start({
                 captureType: 'monitor_capture',
@@ -42,7 +41,7 @@ export default function ManualRecord() {
           <Window
             key={w.value}
             data={w}
-            active={isRecording && selectedWindow?.value === w.value}
+            active={isRecording && selectedWindowInfo?.value === w.value}
             onClickBtn={() => {
               start({
                 captureType: 'window_capture',

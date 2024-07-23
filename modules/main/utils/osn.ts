@@ -4,12 +4,11 @@ import { app, desktopCapturer, screen } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
 import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
-import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { IListProperty, IScene } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
 import { isMac } from '@main/utils/byOS';
 import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
-import { CategorySetting } from '@main/utils/osn/obs_types';
+import { CategorySetting, ObsOutputSignalInfo } from '@main/utils/osn/obs_types';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = path.join(process.cwd(), 'node_modules', 'obs-studio-node').replace('app.asar', 'app.asar.unpacked');
@@ -21,6 +20,7 @@ interface ObsManagerProps {
   host?: string;
   obsStudioNodePkgPath?: string;
   osnDataPath?: string;
+  onSignal?: (signalInfo: ObsOutputSignalInfo) => void;
 }
 
 export class ObsManager {
@@ -29,31 +29,33 @@ export class ObsManager {
   obsStudioNodePkgPath: string;
   osnDataPath: string;
   isInit = false;
+  onSignal?: (signalInfo: ObsOutputSignalInfo) => void;
 
   constructor(props: ObsManagerProps) {
     this.host = props.host || HOST_NAME + uid(8);
     this.obsStudioNodePkgPath = props.obsStudioNodePkgPath || OBS_NODE_PKG_PATH;
     this.osnDataPath = props.osnDataPath || OBS_DATA_PATH;
     this.debug = props.debug || false;
+    this.onSignal = props.onSignal;
 
     if (!isMac()) {
       osn = require('obs-studio-node');
     }
 
     /** 최초 1회 기본값 세팅 */
-    const savedObsSetting = settings.get('obs');
-    if (!savedObsSetting) {
-      settings.set('obs', {
-        outDir: app.getPath('desktop'),
-        videoFormat: VIDEO_FORMATS[1], // mp4
-        videoBitRate: VIDEO_BIT_RATES[3], // 1080p (12Mbps)
-        videoFps: FPS_VALUES[2], // 60fps
-        latestSceneOption: {
-          captureType: 'monitor_capture',
-          monitorInfo: this.getMonitorList()[0]
-        }
-      });
-    }
+    // const savedObsSetting = settings.get('obs');
+    // if (!savedObsSetting) {
+    //   settings.set('obs', {
+    //     outDir: app.getPath('desktop'),
+    //     videoFormat: VIDEO_FORMATS[1], // mp4
+    //     videoBitRate: VIDEO_BIT_RATES[3], // 1080p (12Mbps)
+    //     videoFps: FPS_VALUES[2], // 60fps
+    //     latestSceneOption: {
+    //       captureType: 'monitor_capture',
+    //       monitorInfo: this.getMonitorList()[0]
+    //     }
+    //   });
+    // }
   }
 
   init() {
@@ -65,7 +67,12 @@ export class ObsManager {
       this.shutdown();
       throw new Error('Failed to initialize OBS');
     }
-    debugLog('OBS Successfully Running');
+    debugLog('@@@@@ OBS Successfully Running');
+
+    osn.NodeObs.OBS_service_connectOutputSignals((signalInfo: ObsOutputSignalInfo) => {
+      debugLog('@@@@@ Signal >> ', signalInfo);
+      this.onSignal?.(signalInfo);
+    });
 
     // 720p (7.5Mbps)
 
@@ -102,7 +109,7 @@ export class ObsManager {
     const manualObsSettings = settings.get('manualObsSettings');
     manualObsSettings.forEach((setting) => {
       this.setSetting(EOBSSettingsCategories[setting.categoryEnumKey], setting.parameter, setting.value);
-      debugLog(`Load Manual OBS Setting`, `categoryEnumKey: ${setting.categoryEnumKey}, parameter: ${setting.parameter}, value: ${setting.value}`);
+      debugLog(`@@@@@ Load Manual OBS Setting`, `categoryEnumKey: ${setting.categoryEnumKey}, parameter: ${setting.parameter}, value: ${setting.value}`);
     });
   }
 
@@ -120,30 +127,6 @@ export class ObsManager {
     }
     this.setSetting('Output', 'FilePath', path);
     settings.set('obs', { ...settings.get('obs'), outDir: path });
-  }
-
-  setFps(fps: (typeof FPS_VALUES)[number]) {
-    if (!this.isInit) {
-      throw new Error('OBS is not initialized');
-    }
-    this.setSetting('Video', 'FPSCommon', fps);
-    settings.set('obs', { ...settings.get('obs'), videoFps: fps });
-  }
-
-  setBitrate(bitrate: (typeof VIDEO_BIT_RATES)[number]) {
-    if (!this.isInit) {
-      throw new Error('OBS is not initialized');
-    }
-    this.setSetting('Output', 'VBitrate', bitrate.value);
-    settings.set('obs', { ...settings.get('obs'), videoBitRate: bitrate });
-  }
-
-  setFormat(format: (typeof VIDEO_FORMATS)[number]) {
-    if (!this.isInit) {
-      throw new Error('OBS is not initialized');
-    }
-    this.setSetting('Output', 'RecFormat', format);
-    settings.set('obs', { ...settings.get('obs'), videoFormat: format });
   }
 
   updateScene(option: SceneOption) {
@@ -263,7 +246,7 @@ export class ObsManager {
 
     /** video 소스 셋업 (모니터 or 윈도우) */
     if (option.captureType === 'monitor_capture') {
-      debugLog(`Start Video source setup with monitor`);
+      debugLog(`@@@@@ Start Video source setup with monitor`);
       debugLog(option);
 
       /** 모니터 캡처 설정 */
@@ -285,10 +268,10 @@ export class ObsManager {
       this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
       this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
 
-      debugLog(`Output Size: ${outputWidth}x${outputHeight}`);
-      debugLog('Video source setup complete');
+      debugLog(`@@@@@ Output Size: ${outputWidth}x${outputHeight}`);
+      debugLog('@@@@@ Video source setup complete');
     } else if (option.captureType === 'window_capture') {
-      debugLog(`Start Video source setup with window`);
+      debugLog(`@@@@@ Start Video source setup with window`);
       debugLog(option);
 
       /** 윈도우 캡처 설정 */
@@ -308,8 +291,8 @@ export class ObsManager {
         const outputHeight = videoSource.height;
         this.setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
         this.setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
-        debugLog(`Output Size: ${outputWidth}x${outputHeight}`);
-        debugLog('Video source setup complete');
+        debugLog(`@@@@@ Output Size: ${outputWidth}x${outputHeight}`);
+        debugLog('@@@@@ Video source setup complete');
       }, 500);
     }
     return scene;
@@ -360,7 +343,7 @@ export class ObsManager {
     if (!this.isInit) {
       throw new Error('OBS is not initialized');
     }
-    debugLog('Starting recording...');
+    debugLog('@@@@@ Try Starting recording...');
     osn.NodeObs.OBS_service_startRecording();
   }
 
@@ -368,8 +351,7 @@ export class ObsManager {
     if (!this.isInit) {
       throw new Error('OBS is not initialized');
     }
-    debugLog('Stopping recording...');
+    debugLog('@@@@@ Try Stopping recording...');
     osn.NodeObs.OBS_service_stopRecording();
-    debugLog('Stopped!');
   }
 }

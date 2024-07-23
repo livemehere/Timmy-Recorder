@@ -3,7 +3,6 @@ import { MainWindow } from '@main/windows/MainWindow';
 import * as os from 'os';
 import { DEEP_LINK_PROTOCOL } from '@shared/config';
 import { settings } from '@main/Settings';
-import { FPS_VALUES, VIDEO_BIT_RATES, VIDEO_FORMATS } from '@shared/shared-const';
 import { SceneOption } from '@shared/shared-type';
 import { ObsManager } from '@main/utils/osn';
 import { isMac } from '@main/utils/byOS';
@@ -28,7 +27,12 @@ class Main {
     await this.createMainWindow();
     this.handleInvoke();
     if (!isMac()) {
-      this.osnManager = new ObsManager({ debug: true });
+      this.osnManager = new ObsManager({
+        debug: true,
+        onSignal: (signalInfo) => {
+          this.mainWindow?.get().webContents.send('osn:signal', signalInfo);
+        }
+      });
       this.osnManager.init();
     }
   }
@@ -195,22 +199,6 @@ class Main {
       return this.osnManager?.stopRecording();
     });
 
-    ipcMain.handle('osn:formatValues', async () => {
-      return VIDEO_FORMATS;
-    });
-
-    ipcMain.handle('osn:setFormat', async (_, format: (typeof VIDEO_FORMATS)[number]) => {
-      return this.osnManager?.setFormat(format);
-    });
-
-    ipcMain.handle('osn:setFps', async (_, fps: (typeof FPS_VALUES)[number]) => {
-      return this.osnManager?.setFps(fps);
-    });
-
-    ipcMain.handle('osn:getFpsValues', async () => {
-      return FPS_VALUES;
-    });
-
     // get performance
     ipcMain.handle('osn:getPerformance', async () => {
       return this.osnManager?.getPerformance();
@@ -234,16 +222,6 @@ class Main {
     // update scene
     ipcMain.handle('osn:updateScene', async (_, option: SceneOption) => {
       return this.osnManager?.updateScene(option);
-    });
-
-    // bitrate list
-    ipcMain.handle('osn:getBitrateValues', async () => {
-      return VIDEO_BIT_RATES;
-    });
-
-    // set bitrate
-    ipcMain.handle('osn:setBitrate', async (_, bitrate: (typeof VIDEO_BIT_RATES)[number]) => {
-      return this.osnManager?.setBitrate(bitrate);
     });
 
     // get window list

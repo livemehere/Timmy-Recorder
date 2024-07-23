@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect } from 'react';
+import { FC, ReactNode } from 'react';
 import useDeepLink from '@renderer/src/hooks/useDeepLink';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiFillSetting } from 'react-icons/ai';
@@ -6,11 +6,12 @@ import SideBar from '@renderer/src/layouts/ui';
 import { MdAutoFixHigh } from 'react-icons/md';
 import { FaRecordVinyl } from 'react-icons/fa';
 import { CgEditFlipH } from 'react-icons/cg';
-import { useModal } from 'async-modal-react';
-import RecordingOverlay from '@renderer/src/components/modals/RecordingOverlay';
 import { useGlobalAtom } from '@renderer/src/store/globalAtom';
 import Usage from '@renderer/src/components/Usage';
 import useObsPerformance from '@renderer/src/hooks/queries/useObsPerformance';
+import useOn from '@renderer/src/hooks/useOn';
+import { ObsOutputSignalInfo } from '@main/utils/osn/obs_types';
+import ObsOverlay from '@renderer/src/layouts/ObsOverlay';
 
 interface Props {
   children: ReactNode;
@@ -42,30 +43,11 @@ const MENU = [
 const Layout: FC<Props> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    state: { isRecording, currentAutoRecordWindow },
-    setCurrentAutoRecordWindow
-  } = useGlobalAtom();
-  const { pushModal, closeAllModals } = useModal();
-
+  const { setObsSignalInfo } = useGlobalAtom();
   const { data: performance } = useObsPerformance();
 
-  const cancelAutoRecording = () => setCurrentAutoRecordWindow(undefined);
-
-  useEffect(() => {
-    if (isRecording || currentAutoRecordWindow) {
-      closeAllModals();
-      pushModal(
-        RecordingOverlay,
-        { currentAutoRecordWindow, cancelAutoRecording },
-        {
-          onClickOutsideClose: false
-        }
-      );
-    } else {
-      closeAllModals();
-    }
-  }, [isRecording, currentAutoRecordWindow]);
+  /** OBS 시그널을 받아, globalAtom 에 set 합니다. */
+  useOn<ObsOutputSignalInfo>('osn:signal', setObsSignalInfo);
 
   useDeepLink((url) => {
     navigate(url);
@@ -73,6 +55,7 @@ const Layout: FC<Props> = ({ children }) => {
 
   return (
     <>
+      <ObsOverlay />
       <nav id="window-handle">
         <p>Timmy Recorder</p>
       </nav>
