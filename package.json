@@ -6,6 +6,11 @@
   "build": {
     "productName": "Timmy-Recoder",
     "appId": "com.livemehere.Timmy-Recoder",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/obs-studio-node",
+      "node_modules/ffmpeg-static"
+    ],
     "files": [
       "dist/**/*"
     ],
@@ -29,9 +34,9 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "cross-env NODE_ENV=production node scripts/build.mjs",
-    "build:mac-arm64": "cross-env BUILD_TARGET=mac-arm64 yarn build",
-    "build:mac-x64": "cross-env BUILD_TARGET=mac-x64 yarn build",
-    "build:win-x64": "cross-env BUILD_TARGET=win-x64 yarn build",
+    "build:mac-arm64": "cross-env NODE_ENV=production BUILD_TARGET=mac-arm64 yarn build",
+    "build:mac-x64": "cross-env NODE_ENV=production BUILD_TARGET=mac-x64 yarn build",
+    "build:win-x64": "cross-env NODE_ENV=production BUILD_TARGET=win-x64 yarn build",
     "dev": "cross-env NODE_ENV=development VITE_DEBUG=1 node scripts/dev.mjs",
     "preview": "cross-env NODE_ENV=production VITE_DEBUG=1 electron .",
     "lint": "eslint . --ext .ts,.tsx"
@@ -44,6 +49,7 @@
     "async-modal-react": "^2.1.7",
     "axios": "^1.6.8",
     "clsx": "^2.1.1",
+    "electron-log": "^5.1.6",
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.3",
     "framer-motion": "^11.0.20",
@@ -53,6 +59,7 @@
     "obs-studio-node": "https://s3-us-west-2.amazonaws.com/obsstudionodes3.streamlabs.com/osn-0.15.6-release-win64.tar.gz",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.13",
     "react-icons": "^5.2.1",
     "react-konva": "^18.2.10",
     "react-router-dom": "^6.22.3",

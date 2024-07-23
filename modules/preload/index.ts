@@ -13,7 +13,7 @@ const preloadAPI: TPreloadAPI = {
   invoke: async (channel, ...args) => ipcRenderer.invoke(channel, ...args),
   on: (channel, callback) => {
     seq++;
-    const listener = (event: IpcRendererEvent, ...args: any[]) => callback(...args);
+    const listener = (event: IpcRendererEvent, args: any) => callback(args);
     map.set(seq, { channel, listener });
     ipcRenderer.on(channel, listener);
     return seq;

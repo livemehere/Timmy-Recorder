@@ -1,7 +1,7 @@
 import ffmpegPath from 'ffmpeg-static';
 import ffmpeg from 'fluent-ffmpeg';
 
-ffmpeg.setFfmpegPath(ffmpegPath!);
+ffmpeg.setFfmpegPath(ffmpegPath!.replace('app.asar', 'app.asar.unpacked'));
 
 /** example */
 // const images = path.resolve(__dirname, '../images/image-%d.png');

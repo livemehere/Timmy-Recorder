@@ -3746,6 +3746,7 @@ __metadata:
     electron: "npm:^29.1.5"
     electron-builder: "npm:^24.13.3"
     electron-devtools-installer: "npm:^3.2.0"
+    electron-log: "npm:^5.1.6"
     eslint: "npm:^8.57.0"
     eslint-plugin-react: "npm:^7.34.1"
     eslint-plugin-unused-imports: "npm:^3.1.0"
@@ -3761,6 +3762,7 @@ __metadata:
     prettier-plugin-tailwindcss: "npm:^0.5.12"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
+    react-error-boundary: "npm:^4.0.13"
     react-icons: "npm:^5.2.1"
     react-konva: "npm:^18.2.10"
     react-router-dom: "npm:^6.22.3"
@@ -4994,6 +4996,13 @@ __metadata:
     tslib: "npm:^2.1.0"
     unzip-crx-3: "npm:^0.2.0"
   checksum: 10c0/50d56e174e3bbe568d3d4a56a56e8c87faf44aa54a49ecc93ab672905f30ca1bf4e6a1b5a0b297c6ffeec1e89848086a6ff47f0db8197edb16d1bda16d6440c2
+  languageName: node
+  linkType: hard
+
+"electron-log@npm:^5.1.6":
+  version: 5.1.6
+  resolution: "electron-log@npm:5.1.6"
+  checksum: 10c0/f04bc4d362ac9e9cf07ab3864720c0732dbd6454447a493ac23a193aefc065e4c78367ac295de5cb93d308377f6c5bea6fed5884e2c52fb8e3c0757c1afc6b7c
   languageName: node
   linkType: hard
 

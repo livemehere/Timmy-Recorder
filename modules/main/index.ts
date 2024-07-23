@@ -13,6 +13,9 @@ import { convertImageFramesToVideo } from '@main/utils/ffmpeg';
 import { FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
+import log from 'electron-log/main';
+
+log.initialize();
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
