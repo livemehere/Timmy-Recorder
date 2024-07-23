@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import { CategorySetting } from '@main/utils/osn/obs_types';
 
@@ -13,4 +13,15 @@ export default function useObsSettingSubCategory(categoryEnumKey: TSettingCatego
       return window.app.invoke<CategorySetting>('osn:getSubCategoryAndParams', categoryEnumKey).then((res) => res.data);
     }
   });
+}
+
+export function useInvalidateAllSubCategory() {
+  const queryClient = useQueryClient();
+  const invalidate = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === OBS_SETTINGS_SUB_CATEGORY_QUERY_KEY[0]
+    });
+  };
+
+  return invalidate;
 }

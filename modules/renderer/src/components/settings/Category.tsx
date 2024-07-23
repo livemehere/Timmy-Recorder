@@ -2,10 +2,9 @@ import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import useInvoke from '@renderer/src/hooks/useInvoke';
 import { CategorySetting } from '@main/utils/osn/obs_types';
 import { createContext, useState } from 'react';
-import { Selection } from '@react-types/shared/src/selection';
 import { Listbox, ListboxItem, Switch, Tab, Tabs } from '@nextui-org/react';
 import { SetSettingArgs } from '../../../../../typings/preload';
-import useObsSettingSubCategory from '@renderer/src/hooks/queries/useObsSettingSubCategory';
+import useObsSettingSubCategory, { useInvalidateAllSubCategory } from '@renderer/src/hooks/queries/useObsSettingSubCategory';
 
 type Props = {
   categoryEnumKey: TSettingCategoryEnumKey;
@@ -54,30 +53,33 @@ function SubCategory({ subCategory, categoryEnumKey }: { subCategory: CategorySe
 }
 
 function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['parameters'][0]; categoryEnumKey: TSettingCategoryEnumKey }) {
-  /** boolean 값이 아닐경우에만 사용됨. */
-  const [selectedParam, setSelectedParam] = useState<Selection>(new Set([param.currentValue as string]));
-  const [boolValue, setBoolValue] = useState<boolean>(param.currentValue as boolean);
-  const paramValues = param.values.map((p) => Object.values(p)[0]);
+  const invalidate = useInvalidateAllSubCategory();
   const { invoke } = useInvoke<void, SetSettingArgs>('osn:setSetting', {
     initialRun: false,
     onInvoke: () => {
+      invalidate();
       console.log(`invoke setSetting : ${categoryEnumKey} ${param.name}`);
     }
   });
-  /** 타입이 불리언인 경우 처리하기 */
+  const paramValues = param.values.map((p) => Object.values(p)[0]);
+
+  /* 현재 값 */
+  const selectedParam = new Set([param.currentValue as string]);
+  const boolValue = param.currentValue as boolean;
   const isBooleanValue = param.type === 'OBS_PROPERTY_BOOL';
+  const currentValueString = typeof param.currentValue === 'boolean' ? (param.currentValue ? 'True' : 'False') : param.currentValue;
 
   return (
     <div className="my-2">
       <div>파라미터 : {param.name}</div>
       <div className="mb-4 text-xs opacity-80">{param.description}</div>
+      <div className="mb-3 text-sm text-blue-500">현제 값 : {currentValueString}</div>
       {isBooleanValue ? (
         <div>
           <Switch
             size="sm"
             isSelected={boolValue}
             onValueChange={(v) => {
-              setBoolValue(v);
               invoke<SetSettingArgs>({
                 categoryEnumKey: categoryEnumKey,
                 parameter: param.name,
@@ -96,7 +98,6 @@ function Param({ param, categoryEnumKey }: { param: CategorySetting['data'][0]['
           selectionMode="single"
           selectedKeys={selectedParam}
           onSelectionChange={(keys) => {
-            setSelectedParam(keys);
             const selectedValue = Array.from(keys).join(', ');
             invoke<SetSettingArgs>({
               categoryEnumKey: categoryEnumKey,
