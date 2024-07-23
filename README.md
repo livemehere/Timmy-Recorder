@@ -13,3 +13,7 @@
 
 - `window_capture` 빈화면 문제 [이슈링크](https://github.com/stream-labs/obs-studio-node/issues/1104)
 - 
+
+## Tips
+
+- 빌드 결과가 이상해서 디버깅 하고 싶을 때는 `yarn build:no-pack` 과 `yarn preview` 를 활용하세요.

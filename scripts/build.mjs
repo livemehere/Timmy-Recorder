@@ -4,6 +4,7 @@ import builder, { Arch } from "electron-builder";
 const Platform = builder.Platform;
 
 const BUILD_TARGET = process.env.BUILD_TARGET;
+const onlyBuildFile = process.env.NO_PACK === '1';
 async function buildRenderer() {
   await viteBuild(rendererConfig);
 }
@@ -43,7 +44,9 @@ async function run() {
   await buildRenderer();
   await buildPreload();
   await buildMain();
-  await buildApp();
+  if(!onlyBuildFile){
+    await buildApp();
+  }
 }
 
 run().catch((e) => {

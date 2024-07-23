@@ -34,11 +34,12 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "cross-env NODE_ENV=production node scripts/build.mjs",
+    "build:no-pack": "cross-env NODE_ENV=production NO_PACK=1 node scripts/build.mjs",
     "build:mac-arm64": "cross-env NODE_ENV=production BUILD_TARGET=mac-arm64 yarn build",
     "build:mac-x64": "cross-env NODE_ENV=production BUILD_TARGET=mac-x64 yarn build",
     "build:win-x64": "cross-env NODE_ENV=production BUILD_TARGET=win-x64 yarn build",
     "dev": "cross-env NODE_ENV=development VITE_DEBUG=1 node scripts/dev.mjs",
-    "preview": "cross-env NODE_ENV=production VITE_DEBUG=1 electron .",
+    "preview": "cross-env NODE_ENV=production PREVIEW=1 VITE_DEBUG=1 electron .",
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {

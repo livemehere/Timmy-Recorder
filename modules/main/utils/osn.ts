@@ -65,7 +65,8 @@ export class ObsManager {
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
     if (apiInitRes !== 0) {
       this.shutdown();
-      throw new Error('Failed to initialize OBS');
+      alert(`Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
+      throw new Error(`Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
     }
     debugLog('@@@@@ OBS Successfully Running');
 
