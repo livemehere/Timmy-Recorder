@@ -1,5 +1,5 @@
 import path from 'path';
-import { app, desktopCapturer, screen } from 'electron';
+import { app, desktopCapturer, dialog, screen } from 'electron';
 import { uid } from 'uid';
 import debugLog from '@shared/debugLog';
 import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
@@ -65,8 +65,8 @@ export class ObsManager {
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
     if (apiInitRes !== 0) {
       this.shutdown();
-      alert(`Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
-      throw new Error(`Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
+      dialog.showErrorBox('OSN API 초기화 중 에러 발생', `Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
+      dialog.showErrorBox('OSN API 초기화 중 에러 발생', `Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
     }
     debugLog('@@@@@ OBS Successfully Running');
 
@@ -153,7 +153,12 @@ export class ObsManager {
       osn.NodeObs.OBS_service_removeCallback();
       osn.NodeObs.IPC.disconnect();
     } catch (e) {
-      throw Error(`Exception when shutting down OBS process${e}`);
+      if (e instanceof Error) {
+        dialog.showErrorBox('OBS 종료 중 에러 발생', e.message);
+      } else {
+        // @ts-ignore
+        dialog.showErrorBox('OBS 종료 중 에러 발생', e.toString());
+      }
     }
   }
 
@@ -209,7 +214,7 @@ export class ObsManager {
     return parameterSettings.values.map((value: any) => Object.values(value)[0]);
   }
 
-  async getMonitorThumbnail(displayId: number) {
+  async getMonitorThumbnail(displayId: number): Promise<string | null> {
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
       thumbnailSize: {
@@ -219,7 +224,7 @@ export class ObsManager {
     });
     const display = sources.find((capture) => +capture.display_id === displayId);
     if (!display) {
-      throw new Error('display not found');
+      return null;
     }
     return display.thumbnail.toDataURL();
   }
@@ -252,7 +257,7 @@ export class ObsManager {
     return _windows;
   }
 
-  setupScene(option: SceneOption) {
+  setupScene(option: SceneOption): IScene {
     const videoSource = osn.InputFactory.create(option.captureType, 'target-video');
     const scene = osn.SceneFactory.create('capture-scene');
 
@@ -335,11 +340,6 @@ export class ObsManager {
     // });
 
     this.setSetting('Output', 'RecTracks', parseInt('1'.repeat(currentTrack - 1), 2)); // Bit mask of used tracks: 1111 to use first four (from available six)
-    //
-    // setTimeout(() => {
-    //   console.log(scene.getItems().length);
-    //   console.log(scene.getItems()[0].source.width, scene.getItems()[0].source.height);
-    // }, 100);
   }
 
   getAudioDevices(type: string, subtype: string) {
@@ -353,7 +353,8 @@ export class ObsManager {
 
   startRecording() {
     if (!this.isInit) {
-      throw new Error('OBS is not initialized');
+      dialog.showErrorBox('녹화 시작 중 에러 발생', 'OSN 이 초기화되지 않았습니다.');
+      return;
     }
     debugLog('@@@@@ Try Starting recording...');
     osn.NodeObs.OBS_service_startRecording();
@@ -361,7 +362,8 @@ export class ObsManager {
 
   stopRecording() {
     if (!this.isInit) {
-      throw new Error('OBS is not initialized');
+      dialog.showErrorBox('녹화 중단 중 에러 발생', 'OSN 이 초기화되지 않았습니다.');
+      return;
     }
     debugLog('@@@@@ Try Stopping recording...');
     osn.NodeObs.OBS_service_stopRecording();
