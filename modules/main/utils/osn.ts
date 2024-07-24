@@ -5,15 +5,14 @@ import debugLog from '@shared/debugLog';
 import { IPerformanceState, MonitorInfo, SceneOption, WindowInfo } from '@shared/shared-type';
 import { IListProperty, IScene } from 'obs-studio-node/module';
 import { settings, SettingsData } from '@main/Settings';
-import { isMac } from '@main/utils/byOS';
 import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
 import { CategorySetting, ObsOutputSignalInfo } from '@main/utils/osn/obs_types';
 import resolveUnpackedNodeModulePath from '@main/utils/resolveUnpackedNodeModulePath';
+import osn from 'obs-studio-node';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = resolveUnpackedNodeModulePath('obs-studio-node');
 const OBS_DATA_PATH = path.join(app.getPath('userData'), 'osn-data');
-let osn: any;
 
 interface ObsManagerProps {
   debug?: boolean;
@@ -38,10 +37,6 @@ export class ObsManager {
     this.debug = props.debug || false;
     this.onSignal = props.onSignal;
 
-    if (!isMac()) {
-      osn = require('obs-studio-node');
-    }
-
     /** 최초 1회 기본값 세팅 */
     // const savedObsSetting = settings.get('obs');
     // if (!savedObsSetting) {
@@ -65,8 +60,11 @@ export class ObsManager {
     const apiInitRes = osn.NodeObs.OBS_API_initAPI('en-US', this.osnDataPath, '1.0.0');
     if (apiInitRes !== 0) {
       this.shutdown();
-      dialog.showErrorBox('OSN API 초기화 중 에러 발생', `Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
-      dialog.showErrorBox('OSN API 초기화 중 에러 발생', `Failed to initialize OBS resCode:${apiInitRes}, host:${this.host}, path:${this.obsStudioNodePkgPath}`);
+      const len = this.obsStudioNodePkgPath.length;
+      const sliceLen = len > 50 ? 50 : len;
+      for (let i = 0; i < len; i += sliceLen) {
+        dialog.showErrorBox('OBS API 초기화 중 에러 발생', `path:${this.obsStudioNodePkgPath.slice(i, i + sliceLen)}`);
+      }
     }
     debugLog('@@@@@ OBS Successfully Running');
 
@@ -344,6 +342,7 @@ export class ObsManager {
 
   getAudioDevices(type: string, subtype: string) {
     const dummyDevice = osn.InputFactory.create(type, subtype, { device_id: 'does_not_exist' });
+    // @ts-ignore
     const devices = dummyDevice.properties.get('device_id').details.items.map(({ name, value }: { name: string; value: string }) => {
       return { device_id: value, name };
     });

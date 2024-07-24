@@ -1,9 +1,9 @@
 import { resolve } from 'path';
-import { IS_PREVIEW } from '@main/config';
+import { NO_PACK } from '@main/config';
 
 export default function resolveUnpackedNodeModulePath(path: string) {
-  if (process.env.NODE_ENV === 'production' && !IS_PREVIEW) {
-    return resolve(process.cwd(), 'resources', 'app.asar.unpacked', 'node_modules', path);
+  if (NO_PACK) {
+    return resolve(process.cwd(), 'node_modules', path);
   }
-  return resolve(process.cwd(), 'node_modules', path);
+  return resolve(__dirname, 'node_modules', path).replace('app.asar', 'app.asar.unpacked').replace('dist', '');
 }

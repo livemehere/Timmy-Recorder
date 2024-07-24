@@ -24,6 +24,7 @@ class Main {
     // app.disableHardwareAcceleration();
     await app.whenReady();
     this.appSettings();
+    await this.createMainWindow();
     if (!isMac()) {
       this.osnManager = new ObsManager({
         debug: true,
@@ -33,7 +34,7 @@ class Main {
       });
       this.osnManager.init();
     }
-    await this.createMainWindow();
+
     this.handleInvoke();
   }
 
