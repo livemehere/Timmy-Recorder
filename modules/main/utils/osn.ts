@@ -8,11 +8,13 @@ import { settings, SettingsData } from '@main/Settings';
 import { EOBSSettingsCategories } from '@main/utils/osn/obs_enums';
 import { CategorySetting, ObsOutputSignalInfo } from '@main/utils/osn/obs_types';
 import resolveUnpackedNodeModulePath from '@main/utils/resolveUnpackedNodeModulePath';
-import osn from 'obs-studio-node';
+import { isMac } from '@main/utils/byOS';
+// import osn from 'obs-studio-node';
 
 const HOST_NAME = 'Obj-Manager-Host';
 const OBS_NODE_PKG_PATH = resolveUnpackedNodeModulePath('obs-studio-node');
 const OBS_DATA_PATH = path.join(app.getPath('userData'), 'osn-data');
+let osn: any;
 
 interface ObsManagerProps {
   debug?: boolean;
@@ -36,6 +38,9 @@ export class ObsManager {
     this.osnDataPath = props.osnDataPath || OBS_DATA_PATH;
     this.debug = props.debug || false;
     this.onSignal = props.onSignal;
+    if (!isMac()) {
+      osn = require('obs-studio-node');
+    }
 
     /** 최초 1회 기본값 세팅 */
     // const savedObsSetting = settings.get('obs');
