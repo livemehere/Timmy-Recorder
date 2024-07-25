@@ -8,7 +8,8 @@
     "appId": "com.livemehere.Timmy-Recoder",
     "asar": true,
     "asarUnpack": [
-      "node_modules/ffmpeg-static"
+      "node_modules/ffmpeg-static",
+      "node_modules/ffprobe-static"
     ],
     "files": [
       "dist/**/*"
@@ -51,6 +52,7 @@
     "clsx": "^2.1.1",
     "electron-log": "^5.1.6",
     "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
     "framer-motion": "^11.0.20",
     "jotai": "^2.8.4",
@@ -70,6 +72,7 @@
     "use-image": "^1.1.1"
   },
   "devDependencies": {
+    "@types/ffprobe-static": "^2.0.3",
     "@types/fluent-ffmpeg": "^2",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.69",

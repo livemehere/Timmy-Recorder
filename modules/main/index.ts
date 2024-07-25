@@ -9,7 +9,7 @@ import { isMac } from '@main/utils/byOS';
 import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
-import { convertImageFramesToVideo } from '@main/utils/ffmpeg';
+import { convertImageFramesToVideo, getMetaData } from '@main/utils/ffmpeg';
 import { FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
@@ -264,6 +264,10 @@ class Main {
         width: 1280,
         height: 720
       });
+    });
+
+    ipcMain.handle('video-editor:getMetaData', async (_, filePath: string) => {
+      return getMetaData(filePath);
     });
   }
 }

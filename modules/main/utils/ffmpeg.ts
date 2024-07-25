@@ -1,7 +1,10 @@
 import ffmpegPath from 'ffmpeg-static';
+import ffprobe from 'ffprobe-static';
+
 import ffmpeg from 'fluent-ffmpeg';
 
 ffmpeg.setFfmpegPath(ffmpegPath!.replace('app.asar', 'app.asar.unpacked'));
+ffmpeg.setFfprobePath(ffprobe.path!.replace('app.asar', 'app.asar.unpacked'));
 
 /** example */
 // const images = path.resolve(__dirname, '../images/image-%d.png');
@@ -55,5 +58,17 @@ export function convertImageFramesToVideo({ imagePath, outputPath, fps, width, h
       .on('progress', (progress) => {
         console.log(progress);
       });
+  });
+}
+
+export function getMetaData(filePath: string) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(metadata);
+      }
+    });
   });
 }

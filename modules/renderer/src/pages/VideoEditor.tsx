@@ -6,43 +6,49 @@ import type { OpenDialogSyncOptions } from 'electron';
 import { convertToMediaPath } from '@shared/path';
 import Konva from 'konva';
 import Button from '@renderer/src/components/ui/Button';
-import { FrameToVideoArgs } from '../../../../typings/preload';
+import { FrameToVideoArgs, RVideoMetaData } from '../../../../typings/preload';
 
 export default function VideoEditor() {
-  const frameCanvas = useRef<HTMLCanvasElement>(document.createElement('canvas'));
-  const videoFrameCache = useRef(new Map<number, string>());
-  const ctx = useRef<CanvasRenderingContext2D | null>(frameCanvas.current?.getContext('2d'));
-  const [outputSize, setOutputSize] = useState<[number, number]>([1280, 720]);
-  const [inputFps, setInputFps] = useState<number>(60);
-  const [currentFrame, setCurrentFrame] = useState<number>(0);
-  const [inputDuration, setInputDuration] = useState<number>(0);
-  const totalFrames = inputDuration * inputFps;
   const [currentFrameImageUrl, setCurrentFrameImageUrl] = useState('');
-
   const stageRef = useRef<Konva.Stage>(null);
-
-  const [videoPath, setVideoPath] = useState('');
   const imageRef = useRef<Konva.Image>(null);
   const seeking = useRef(false);
+  const currentFrameDisplayRef = useRef<HTMLDivElement>(null);
 
-  const [outputFrameRange, setOutputFrameRange] = useState<[number, number]>([0, 0 + 60 * 1]);
-  const [outputFrames, setOutputFrames] = useState<string[]>([]);
+  const playStartTimeRef = useRef(0);
+  const currentFrameRef = useRef(0);
+  const frameTimer = useRef<number | undefined>(undefined);
+  const [inputVideoPath, setInputVideoPath] = useState('');
+  const [inputVideoData, setInputVideoData] = useState({
+    duration: 0,
+    totalFrames: 0,
+    fps: 0,
+    width: 0,
+    height: 0,
+    displayAspectRatio: '1/1',
+    bitRate: 0
+  });
+
+  const [outputVideoData, setOutputVideoData] = useState({
+    duration: 0,
+    totalFrames: 0,
+    fps: 0,
+    width: 0,
+    height: 0,
+    displayAspectRatio: '1/1',
+    bitRate: 0,
+    renderFrameRange: [0, 0]
+  });
 
   /** Konva 에서 사용할 Video Element */
   const videoEl = useMemo(() => {
     const el = document.createElement('video');
-    el.src = videoPath;
+    el.src = inputVideoPath;
     return el;
-  }, [videoPath]);
+  }, [inputVideoPath]);
 
   /** Video 가 load 되었을 때 */
   useEffect(() => {
-    const onLoad = () => {
-      setInputDuration(videoEl.duration);
-      setVideoFrame(0);
-      // videoEl.play();
-    };
-
     const onSeeking = () => {
       seeking.current = true;
     };
@@ -52,14 +58,12 @@ export default function VideoEditor() {
     };
 
     if (videoEl) {
-      videoEl.addEventListener('loadedmetadata', onLoad);
       videoEl.addEventListener('seeking', onSeeking);
       videoEl.addEventListener('seeked', onSeeked);
     }
 
     return () => {
       if (videoEl) {
-        videoEl.removeEventListener('loadedmetadata', onLoad);
         videoEl.removeEventListener('seeking', onSeeking);
         videoEl.removeEventListener('seeked', onSeeked);
       }
@@ -79,6 +83,7 @@ export default function VideoEditor() {
   }, [videoEl]);
 
   const setVideoFrame = (frame: number) => {
+    currentFrameRef.current = frame;
     if (seeking.current) return;
     if (videoEl) {
       videoEl.currentTime = frameToSec(frame);
@@ -91,7 +96,27 @@ export default function VideoEditor() {
       properties: ['openFile'],
       filters: [{ name: '비디오 파일', extensions: ['mp4'] }]
     });
-    setVideoPath(convertToMediaPath(path));
+
+    /** metadata 추출 */
+    const metaData = await window.app.invoke<RVideoMetaData>('video-editor:getMetaData', path);
+    const videoStream = metaData.streams.find((s) => s.codec_type === 'video');
+    if (videoStream) {
+      const totalFrames = Number(videoStream.nb_frames) ?? 0;
+      const duration = Number(videoStream.duration) ?? 0;
+      const avgFrameRate = videoStream.avg_frame_rate;
+      const fps = avgFrameRate ? +avgFrameRate.split('/')[0] : 0;
+      const { width, height, display_aspect_ratio, bit_rate } = videoStream;
+      setInputVideoData({
+        duration,
+        totalFrames,
+        fps,
+        width: Number(width),
+        height: Number(height),
+        displayAspectRatio: display_aspect_ratio ?? '1/1',
+        bitRate: Number(bit_rate)
+      });
+    }
+    setInputVideoPath(convertToMediaPath(path));
   };
 
   const handleGetFrameImage = (frame: number) => {
@@ -109,7 +134,42 @@ export default function VideoEditor() {
   };
 
   const frameToSec = (frame: number) => {
-    return frame / inputFps;
+    return frame / inputVideoData.fps;
+  };
+
+  const play = () => {
+    if (videoEl) {
+      videoEl.play();
+      const onFrame = (now: number, metadata: VideoFrameCallbackMetadata) => {
+        if (playStartTimeRef.current === 0.0) {
+          playStartTimeRef.current = now;
+        }
+        const elapsed = (now - startTime) / 1000.0;
+        const fps = (++currentFrameRef.current / elapsed).toFixed(3);
+        currentFrameDisplayRef.current!.innerText = `current: ${currentFrameRef.current} / fps: ${fps}`;
+
+        frameTimer.current = videoEl.requestVideoFrameCallback(onFrame);
+      };
+      frameTimer.current = videoEl.requestVideoFrameCallback(onFrame);
+    }
+  };
+
+  const pause = () => {
+    videoEl.pause();
+    if (frameTimer.current) {
+      window.cancelAnimationFrame(frameTimer.current);
+    }
+  };
+
+  const reset = () => {
+    videoEl.pause();
+    videoEl.currentTime = 0;
+    currentFrameRef.current = 0;
+    playStartTimeRef.current = 0;
+    if (frameTimer.current) {
+      videoEl.cancelVideoFrameCallback(frameTimer.current);
+    }
+    currentFrameDisplayRef.current!.innerText = `current: ${currentFrameRef.current}`;
   };
 
   // useEffect(() => {
@@ -122,7 +182,7 @@ export default function VideoEditor() {
   // }, [currentFrame]);
 
   const extractOutputFrames = async () => {
-    const [startFrame, endFrame] = outputFrameRange;
+    const [startFrame, endFrame] = outputVideoData.renderFrameRange;
     for (let i = startFrame; i < endFrame; i++) {
       await new Promise((resolve) => setTimeout(() => resolve(0), 0));
       const outputImageDataUrl = handleGetFrameImage(i);
@@ -142,14 +202,14 @@ export default function VideoEditor() {
     const res = await window.app.invoke<string, FrameToVideoArgs>('video-editor:frames-to-video', {
       outputPath: 'output.mp4',
       imagePath: 'temp/test-output',
-      fps: 60,
-      width: 1280,
-      height: 720
+      fps: outputVideoData.fps,
+      width: outputVideoData.width,
+      height: outputVideoData.height
     });
   };
 
   const handleExtractCurrentFrame = () => {
-    const image = handleGetFrameImage(currentFrame);
+    const image = handleGetFrameImage(currentFrameRef.current);
     if (image) {
       setCurrentFrameImageUrl(image);
     }
@@ -158,29 +218,45 @@ export default function VideoEditor() {
   return (
     <Container>
       <Title>비디오 편집</Title>
-      <div>
-        <p>출력 정보</p>
-        <p>Size : {outputSize.join('x')}</p>
+      <section className="mb-4 flex gap-2">
+        <Button onClick={handleFindVideo}>비디오 선택</Button>
+      </section>
+      <section className="flex gap-10">
+        <div>
+          <p>입력 정보</p>
+          <p>
+            Size : {inputVideoData.width}x{inputVideoData.height}
+          </p>
+          <p>Duration : {inputVideoData.duration}</p>
+          <p>Total Frames : {inputVideoData.totalFrames}</p>
+          <p>FPS : {inputVideoData.fps}</p>
+          <p>Path : {inputVideoPath || 'path 를 입력해주세요'}</p>
+        </div>
         <hr />
-        <p>원본 정보</p>
-        <p>Duration : {inputDuration}</p>
-        <p>Total Frames : {totalFrames}</p>
-        <p>FPS : {inputFps}</p>
-        <p>Path : {videoPath || 'path 를 입력해주세요'}</p>
-        <input
-          type="number"
-          // value={currentFrame}
-          onChange={(e) => {
-            const frame = +e.target.value;
-            setCurrentFrame(frame);
-            setVideoFrame(frame);
-          }}
-        />
-        <Button onClick={handleFindVideo}>찾기</Button>
-        <div className="flex gap-2 py-2">
-          <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
-          <Button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </Button>
-          <Button onClick={generateVideo}>비디오 렌더링 시작</Button>
+        <div>
+          <p>출력 정보</p>
+          <p>
+            Size : {outputVideoData.width}x{outputVideoData.height}
+          </p>
+          <p>Duration : {outputVideoData.duration}</p>
+          <p>Total Frames : {outputVideoData.totalFrames}</p>
+          <p>FPS : {outputVideoData.fps}</p>
+          <p>Path : {outputVideoData.renderFrameRange.join(' ~ ')}</p>
+        </div>
+      </section>
+      <div>
+        <div>
+          <div>
+            <div ref={currentFrameDisplayRef}>0 fps</div>
+          </div>
+          <div className="flex gap-2 py-2">
+            <Button onClick={play}>재생</Button>
+            <Button onClick={pause}>일시정지</Button>
+            <Button onClick={reset}>리셋</Button>
+            <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
+            <Button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </Button>
+            <Button onClick={generateVideo}>비디오 렌더링 시작</Button>
+          </div>
         </div>
         {/*<div>*/}
         {/*  <p>output frames</p>*/}

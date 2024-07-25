@@ -1,4 +1,5 @@
 import { TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
+import type { FfprobeData } from 'fluent-ffmpeg';
 
 export type OSN =
   | 'osn:getSettingCategories'
@@ -18,7 +19,7 @@ export type OSN =
   | 'osn:getSettings'
   | 'osn:getPerformance'
   | 'osn:getThumbnail';
-export type VideoEdit = 'video-editor:save-frame' | 'video-editor:frames-to-video';
+export type VideoEdit = 'video-editor:save-frame' | 'video-editor:frames-to-video' | 'video-editor:getMetaData';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN | VideoEdit;
 export type TOnChannel = 'osn:signal';
 export type TPreloadAPI = {
@@ -43,3 +44,5 @@ export type SetSettingArgs = {
   parameter: string;
   value: string | boolean;
 };
+
+export type RVideoMetaData = FfprobeData;
