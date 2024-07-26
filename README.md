@@ -17,3 +17,9 @@
 ## Tips
 
 - 빌드 결과가 이상해서 디버깅 하고 싶을 때는 `yarn build:no-pack` 과 `yarn preview` 를 활용하세요.
+
+## References
+
+- [requestVideoFrameCallback](https://wicg.github.io/video-rvfc/)
+- [requestAnimationFrame-web.dev](https://web.dev/articles/requestvideoframecallback-rvfc?hl=ko)
+- 

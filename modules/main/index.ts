@@ -9,8 +9,8 @@ import { isMac } from '@main/utils/byOS';
 import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
-import { convertImageFramesToVideo, getMetaData } from '@main/utils/ffmpeg';
-import { FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
+import { convertImageFramesToVideo, createBlankVideo, getMetaData } from '@main/utils/ffmpeg';
+import { CreateBlankVideoParams, FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
 
@@ -233,6 +233,10 @@ class Main {
     // get window list
     ipcMain.handle('osn:getWindowList', async () => {
       return this.osnManager?.getWindowList();
+    });
+
+    ipcMain.handle('video-editor:create-sequence', async (_, param: CreateBlankVideoParams) => {
+      return createBlankVideo(param);
     });
 
     // TODO: outputName 기반으로 'userData' 에 폴더 저장 하도록 구조 작업 필요

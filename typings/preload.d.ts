@@ -19,7 +19,7 @@ export type OSN =
   | 'osn:getSettings'
   | 'osn:getPerformance'
   | 'osn:getThumbnail';
-export type VideoEdit = 'video-editor:save-frame' | 'video-editor:frames-to-video' | 'video-editor:getMetaData';
+export type VideoEdit = 'video-editor:create-sequence' | 'video-editor:save-frame' | 'video-editor:frames-to-video' | 'video-editor:getMetaData';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN | VideoEdit;
 export type TOnChannel = 'osn:signal';
 export type TPreloadAPI = {
@@ -46,3 +46,12 @@ export type SetSettingArgs = {
 };
 
 export type RVideoMetaData = FfprobeData;
+
+export type CreateBlankVideoParams = {
+  outputPath: string;
+  filename: string;
+  fps: number;
+  duration: number;
+  width: number;
+  height: number;
+};
