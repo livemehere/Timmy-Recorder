@@ -28,7 +28,7 @@ export default function VideoEditor() {
     height: 720,
     displayAspectRatio: '1/1',
     bitRate: 0,
-    renderFrameRange: [0, 0],
+    outputRange: [0, 0],
     outputPath: '',
     outputName: 'test-output',
     format: 'mp4'
@@ -144,6 +144,23 @@ export default function VideoEditor() {
         <Button onClick={handleFindVideo}>비디오 선택</Button>
         <Button onClick={handleSetupOutput}>저장위치 선택</Button>
       </section>
+      <section>
+        <h3>범위 설정</h3>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={outputVideoData.outputRange[0]}
+            onChange={(e) => setOutputVideoData((prev) => ({ ...prev, outputRange: [parseFloat(e.target.value), prev.outputRange[1]] }))}
+            step={0.1}
+          />
+          <input
+            type="number"
+            value={outputVideoData.outputRange[1]}
+            onChange={(e) => setOutputVideoData((prev) => ({ ...prev, outputRange: [prev.outputRange[0], parseFloat(e.target.value)] }))}
+            step={0.1}
+          />
+        </div>
+      </section>
       <section className="flex gap-10">
         <div>
           <p>입력 정보</p>
@@ -162,7 +179,7 @@ export default function VideoEditor() {
             Size : {outputVideoData.width}x{outputVideoData.height}
           </p>
           <p>FPS : {outputVideoData.fps}</p>
-          <p>Path : {outputVideoData.renderFrameRange.join(' ~ ')}</p>
+          <p>렌더링 범위 : {outputVideoData.outputRange.join(' ~ ')}</p>
         </div>
       </section>
       <div>
@@ -175,7 +192,7 @@ export default function VideoEditor() {
             <Button onClick={pause}>일시정지</Button>
             <Button onClick={reset}>리셋</Button>
             <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
-            <Button onClick={() => extractOutputFrames(3, 8)}>렌더링 범위 만큼 이미지 출력하기 </Button>
+            <Button onClick={() => extractOutputFrames(outputVideoData.outputRange[0], outputVideoData.outputRange[1])}>렌더링 범위 만큼 이미지 출력하기 </Button>
             <Button onClick={generateVideo}>비디오 렌더링 시작</Button>
           </div>
           <ProgressBar
