@@ -1,7 +1,6 @@
 import { Image } from 'react-konva';
 import { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import Konva from 'konva';
-import debugLog from '@shared/debugLog';
 import { RVideoMetaData } from '../../../../../typings/preload';
 import { removeMediaPathPrefix } from '@shared/path';
 
@@ -38,6 +37,7 @@ type Props = {
 
 export default function VideoSource({ path, width, height, controls, onChangeFrame, onChangeMetaData }: Props) {
   const [metaData, setMetaData] = useState<TVideoMetaData | undefined>(undefined);
+  const isSeeking = useRef(false);
   const imageRef = useRef<Konva.Image>(null);
   const frameTimer = useRef<number>(0);
   const videoEl = useMemo(() => {
@@ -81,28 +81,40 @@ export default function VideoSource({ path, width, height, controls, onChangeFra
 
     /** metadata 추출 */
     getMetaData().then((data) => {
-      console.log(data);
       setMetaData(data);
     });
+
+    const onSeeking = () => {
+      isSeeking.current = true;
+    };
+
+    const onSeeked = () => {
+      isSeeking.current = false;
+    };
+
+    videoEl.addEventListener('seeking', onSeeking);
+    videoEl.addEventListener('seeked', onSeeked);
 
     return () => {
       anim.stop();
       videoEl.cancelVideoFrameCallback(frameTimer.current);
+      videoEl.removeEventListener('seeking', onSeeking);
+      videoEl.removeEventListener('seeked', onSeeked);
     };
   }, [videoEl]);
 
   useImperativeHandle<any, TVideoControls>(controls, () => ({
     play: () => {
       videoEl.play();
-      debugLog('play video');
     },
     pause: () => {
       videoEl.pause();
-      debugLog('pause video');
     },
     seek: (time: number) => {
-      videoEl.currentTime = time;
-      debugLog(`seek video to ${time}`);
+      window.requestAnimationFrame(() => {
+        if (isSeeking.current) return;
+        videoEl.currentTime = time;
+      });
     },
     getCurrentTime: () => videoEl.currentTime
   }));
