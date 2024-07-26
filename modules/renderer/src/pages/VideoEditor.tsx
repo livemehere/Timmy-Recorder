@@ -21,15 +21,17 @@ export default function VideoEditor() {
   const [inputVideoPath, setInputVideoPath] = useState('');
   const [inputVideoData, setInputVideoData] = useState<TVideoMetaData>();
 
+  const [extractedFrames, setExtractedFrames] = useState<string[]>([]);
   const [outputVideoData, setOutputVideoData] = useState({
-    duration: 0,
-    totalFrames: 0,
-    fps: 0,
-    width: 0,
-    height: 0,
+    fps: 60,
+    width: 1280,
+    height: 720,
     displayAspectRatio: '1/1',
     bitRate: 0,
-    renderFrameRange: [0, 0]
+    renderFrameRange: [0, 0],
+    outputPath: '',
+    outputName: 'test-output',
+    format: 'mp4'
   });
 
   const { invoke } = useInvoke<any, CreateBlankVideoParams>('video-editor:create-sequence');
@@ -39,15 +41,17 @@ export default function VideoEditor() {
       title: '저장위치 선택',
       properties: ['openDirectory']
     });
-    const res = await invoke<CreateBlankVideoParams>({
-      outputPath: outputPath,
-      filename: 'test-output.mp4',
-      fps: 60,
-      duration: 60,
-      width: 1920,
-      height: 1080
-    });
-    console.log(outputPath);
+    setOutputVideoData((prev) => ({ ...prev, outputPath }));
+
+    // const res = await invoke<CreateBlankVideoParams>({
+    //   outputPath: outputPath,
+    //   filename: 'test-output.mp4',
+    //   fps: 60,
+    //   duration: 60,
+    //   width: 1920,
+    //   height: 1080
+    // });
+    // console.log(outputPath);
   };
 
   const handleFindVideo = async () => {
@@ -90,31 +94,47 @@ export default function VideoEditor() {
     sequenceControls.current?.seek(0);
   };
 
-  const extractOutputFrames = async () => {
-    const [startFrame, endFrame] = outputVideoData.renderFrameRange;
-    for (let i = startFrame; i < endFrame; i++) {
-      await new Promise((resolve) => setTimeout(() => resolve(0), 0));
-      const outputImageDataUrl = handleGetFrameImage(i);
-      if (!outputImageDataUrl) {
-        console.log(`${i} 프레임 이미지 추출 실패`);
-        continue;
-      }
-      // setOutputFrames((prev) => [...prev, outputImageDataUrl]);
+  const extractOutputFrames = async (start: number, end: number) => {
+    const controls = sequenceControls.current;
+    if (!controls) return;
+    // 1. set start time
+    controls.seek(start);
 
-      const base64Data = outputImageDataUrl.replace(/^data:image\/png;base64,/, '');
-      await window.app.invoke('video-editor:save-frame', { frame: i, imageBase64: base64Data, outputName: 'test-output' });
-    }
-    console.log('추출 완료');
+    console.log('추출 시작');
+    setExtractedFrames([]);
+    // 2. extract frame on callback
+    let seq = 0;
+    const id = controls.addChangeFrameListener(async ({ currentTime }) => {
+      const outputImageDataUrl = sequenceRef.current?.toDataURL();
+      if (outputImageDataUrl) {
+        // 미리보기 이미지에 추가
+        setExtractedFrames((prev) => [...prev, outputImageDataUrl]);
+
+        // 파일시스템에 저장
+        const base64Data = outputImageDataUrl.replace(/^data:image\/png;base64,/, '');
+        await window.app.invoke('video-editor:save-frame', { frame: seq++, imageBase64: base64Data, outputName: outputVideoData.outputName });
+      } else {
+        console.log(`time:${currentTime} 추출 실패`);
+      }
+      if (currentTime >= end) {
+        controls.removeChangeFrameListener(id);
+        console.log('추출 완료');
+        controls.pause();
+      }
+    });
+    controls.play();
   };
 
   const generateVideo = async () => {
     const res = await window.app.invoke<string, FrameToVideoArgs>('video-editor:frames-to-video', {
-      outputPath: 'output.mp4',
-      imagePath: 'temp/test-output',
+      outputName: outputVideoData.outputName,
+      outputPath: outputVideoData.outputPath,
       fps: outputVideoData.fps,
       width: outputVideoData.width,
-      height: outputVideoData.height
+      height: outputVideoData.height,
+      format: outputVideoData.format as 'mp4'
     });
+    console.log(res);
   };
 
   return (
@@ -141,8 +161,6 @@ export default function VideoEditor() {
           <p>
             Size : {outputVideoData.width}x{outputVideoData.height}
           </p>
-          <p>Duration : {outputVideoData.duration}</p>
-          <p>Total Frames : {outputVideoData.totalFrames}</p>
           <p>FPS : {outputVideoData.fps}</p>
           <p>Path : {outputVideoData.renderFrameRange.join(' ~ ')}</p>
         </div>
@@ -157,7 +175,7 @@ export default function VideoEditor() {
             <Button onClick={pause}>일시정지</Button>
             <Button onClick={reset}>리셋</Button>
             <Button onClick={handleExtractCurrentFrame}>현재 프레임 Preview</Button>
-            <Button onClick={extractOutputFrames}>렌더링 범위 만큼 이미지 출력하기 </Button>
+            <Button onClick={() => extractOutputFrames(3, 8)}>렌더링 범위 만큼 이미지 출력하기 </Button>
             <Button onClick={generateVideo}>비디오 렌더링 시작</Button>
           </div>
           <ProgressBar
@@ -194,6 +212,14 @@ export default function VideoEditor() {
           <Rect x={200} y={100} width={100} height={100} fill="#fff" cornerRadius={8} draggable shadowColor="#fff" shadowBlur={10} />
         </Layer>
       </Stage>
+      <div>
+        <h3>미리보기</h3>
+        <div className="flex flex-wrap gap-2">
+          {extractedFrames.map((frame, idx) => (
+            <img key={idx} src={frame} alt="" className="h-[100px] w-[150px]" />
+          ))}
+        </div>
+      </div>
     </Container>
   );
 }

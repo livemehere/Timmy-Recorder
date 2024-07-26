@@ -3,12 +3,15 @@ import { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react
 import Konva from 'konva';
 import { RVideoMetaData } from '../../../../../typings/preload';
 import { removeMediaPathPrefix } from '@shared/path';
+import { uid } from 'uid';
 
 export type TVideoControls = {
   play: () => void;
   pause: () => void;
   seek: (time: number) => void;
   getCurrentTime: () => number;
+  addChangeFrameListener: (cb: (res: TChangeFrameRes) => void) => string;
+  removeChangeFrameListener: (id: string) => void;
 };
 
 type TChangeFrameRes = {
@@ -36,6 +39,7 @@ type Props = {
 };
 
 export default function VideoSource({ path, width, height, controls, onChangeFrame, onChangeMetaData }: Props) {
+  const frameChangeListeners = useRef<{ [key: string]: (res: TChangeFrameRes) => void }>({});
   const [metaData, setMetaData] = useState<TVideoMetaData | undefined>(undefined);
   const isSeeking = useRef(false);
   const imageRef = useRef<Konva.Image>(null);
@@ -75,7 +79,12 @@ export default function VideoSource({ path, width, height, controls, onChangeFra
       const currentTime = videoEl.currentTime;
       const process = currentTime / videoEl.duration;
       frameTimer.current = videoEl.requestVideoFrameCallback(onFrame);
-      _onChangeFrameCb.current?.({ currentTime, process });
+      const res = {
+        currentTime,
+        process
+      };
+      _onChangeFrameCb.current?.(res);
+      Object.values(frameChangeListeners.current).forEach((cb) => cb(res));
     };
     frameTimer.current = videoEl.requestVideoFrameCallback(onFrame);
 
@@ -116,7 +125,15 @@ export default function VideoSource({ path, width, height, controls, onChangeFra
         videoEl.currentTime = time;
       });
     },
-    getCurrentTime: () => videoEl.currentTime
+    getCurrentTime: () => videoEl.currentTime,
+    addChangeFrameListener: (cb) => {
+      const id = uid(8);
+      frameChangeListeners.current[id] = cb;
+      return id;
+    },
+    removeChangeFrameListener: (id) => {
+      delete frameChangeListeners.current[id];
+    }
   }));
 
   const getMetaData = async (): Promise<TVideoMetaData | undefined> => {

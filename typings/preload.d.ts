@@ -32,11 +32,12 @@ export type TPreloadAPI = {
 /** 응답값 & 파라미터 타입 */
 
 export type FrameToVideoArgs = {
-  imagePath: string;
+  outputName: string;
   outputPath: string;
-  fps: number;
   width: number;
   height: number;
+  fps: number;
+  format: 'mp4';
 };
 
 export type SetSettingArgs = {

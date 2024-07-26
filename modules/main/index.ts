@@ -13,6 +13,7 @@ import { convertImageFramesToVideo, createBlankVideo, getMetaData } from '@main/
 import { CreateBlankVideoParams, FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
+import { dataPath } from '@main/DataPath';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -243,11 +244,9 @@ class Main {
     // video editor
     ipcMain.handle('video-editor:save-frame', async (_, data: { frame: number; imageBase64: string; outputName: string }) => {
       const { frame, imageBase64, outputName } = data;
-      const dirPath = path.resolve(process.cwd(), 'temp', outputName);
-      if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
-      }
-      const filePath = path.resolve(dirPath, `${outputName}-${frame}.png`);
+      dataPath.getPath('output'); // 없으면 만듬.
+      const dirPath = dataPath.getPath(`output/${outputName}`);
+      const filePath = path.resolve(dirPath, `frame-${frame}.png`);
       fs.writeFile(filePath, imageBase64, 'base64', (err) => {
         if (err) {
           console.log(`Error writing file: ${err} frame: ${frame}`);
@@ -260,13 +259,13 @@ class Main {
     // TODO: 마찬가지로 어차피 생성한 프레임 이미지 기반으로만 비디오 생성하기 때문에, outputName 기반으로 main 단에서 알아서 하도록 수정 필요
     // ffmpeg frames to video
     ipcMain.handle('video-editor:frames-to-video', async (_, data: FrameToVideoArgs) => {
-      // const { imagePath, outputPath, fps, width, height } = data;
+      const { outputName, outputPath, fps, width, height, format } = data;
       return convertImageFramesToVideo({
-        imagePath: path.resolve(process.cwd(), 'temp', 'test-output', 'test-output-%d.png'),
-        outputPath: path.resolve(process.cwd(), 'temp', 'output.mp4'),
-        fps: 60,
-        width: 1280,
-        height: 720
+        imagePath: path.resolve(dataPath.root, `output/${outputName}/frame-%d.png`),
+        outputPath: path.resolve(outputPath, `${outputName}.${format}`),
+        fps,
+        width,
+        height
       });
     });
 
