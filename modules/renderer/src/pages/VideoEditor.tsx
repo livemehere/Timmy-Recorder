@@ -1,6 +1,5 @@
 import Container from '../components/ui/Container';
-import Title from '@renderer/src/components/ui/Title';
-import { Layer, Rect, Stage, Star, Text } from 'react-konva';
+import { Layer, Stage, Star, Text } from 'react-konva';
 import { useRef, useState } from 'react';
 import type { OpenDialogSyncOptions } from 'electron';
 import { convertToMediaPath } from '@shared/path';
@@ -139,7 +138,39 @@ export default function VideoEditor() {
 
   return (
     <Container>
-      <Title>비디오 편집</Title>
+      <section className="flex flex-col gap-1">
+        <section className="flex gap-1">
+          <section className="flex flex-1 items-center justify-center bg-black">
+            <Stage width={1280} height={720} ref={sequenceRef}>
+              <Layer>
+                <VideoSource
+                  width={1280}
+                  height={720}
+                  path={inputVideoPath}
+                  controls={sequenceControls}
+                  onChangeFrame={({ process }) => {
+                    progressControls.current?.seek(process);
+                  }}
+                  onChangeMetaData={setInputVideoData}
+                />
+                <Text text="Hello,world" fontSize={50} fill="white" shadowBlur={5} shadowColor="#fff" draggable />
+                <Star id="1" x={100} y={100} numPoints={5} fill="red" innerRadius={40} outerRadius={70} draggable />
+              </Layer>
+            </Stage>
+          </section>
+          <section className="w-[300px] bg-neutral-950">
+            <h2>리소스</h2>
+          </section>
+        </section>
+        <section className="bg-neutral-950 p-2">
+          <button>Play</button>
+          <button>Pause</button>
+          <button>Reset</button>
+        </section>
+        <section className="h-[300px] bg-neutral-950">
+          <h3>타임라인</h3>
+        </section>
+      </section>
       <section className="mb-4 flex gap-2">
         <Button onClick={handleFindVideo}>비디오 선택</Button>
         <Button onClick={handleSetupOutput}>저장위치 선택</Button>
@@ -212,31 +243,6 @@ export default function VideoEditor() {
         )}
       </div>
       <hr style={{ margin: '20px 0' }} />
-      <Stage width={1280} height={720} ref={sequenceRef}>
-        <Layer>
-          <VideoSource
-            width={1280}
-            height={720}
-            path={inputVideoPath}
-            controls={sequenceControls}
-            onChangeFrame={({ process }) => {
-              progressControls.current?.seek(process);
-            }}
-            onChangeMetaData={setInputVideoData}
-          />
-          <Text text="Hello,world" fontSize={50} fill="white" shadowBlur={5} shadowColor="#fff" draggable />
-          <Star id="1" x={100} y={100} numPoints={5} fill="red" innerRadius={40} outerRadius={70} draggable />
-          <Rect x={200} y={100} width={100} height={100} fill="#fff" cornerRadius={8} draggable shadowColor="#fff" shadowBlur={10} />
-        </Layer>
-      </Stage>
-      <div>
-        <h3>미리보기</h3>
-        <div className="flex flex-wrap gap-2">
-          {extractedFrames.map((frame, idx) => (
-            <img key={idx} src={frame} alt="" className="h-[100px] w-[150px]" />
-          ))}
-        </div>
-      </div>
     </Container>
   );
 }

@@ -1,6 +1,27 @@
 import { atom } from 'jotai';
 import { useImmerAtom } from 'jotai-immer';
 
+interface TResource {
+  origin: {
+    path: string;
+    width: number;
+    height: number;
+    duration: number;
+    fps: number;
+  };
+  id: string;
+  name: string;
+  path: string;
+  width: number;
+  height: number;
+  duration: number;
+  fps: number;
+  startTime: number;
+  endTime: number;
+  display: 'show' | 'hidden';
+  type: 'video' | 'audio' | 'image' | 'text';
+}
+
 interface TEditorAtom {
   input: {
     fps: number;
@@ -16,23 +37,11 @@ interface TEditorAtom {
     outputFilename: string;
     outputDir: string;
   };
-  videoSources: {
-    origin: {
-      path: string;
-      width: number;
-      height: number;
-      duration: number;
-      fps: number;
-    };
+  videoSources: TResource[];
+  layers: {
     id: string;
     name: string;
-    path: string;
-    width: number;
-    height: number;
-    duration: number;
-    fps: number;
-    startTime: number;
-    endTime: number;
+    resources: TResource[];
   }[];
 }
 
