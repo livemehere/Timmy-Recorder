@@ -1,5 +1,5 @@
 import Container from '../components/ui/Container';
-import { Layer, Stage, Star, Text } from 'react-konva';
+import { Layer, Rect, Stage, Star, Text } from 'react-konva';
 import { useRef, useState } from 'react';
 import type { OpenDialogSyncOptions } from 'electron';
 import { convertToMediaPath } from '@shared/path';
@@ -140,7 +140,7 @@ export default function VideoEditor() {
     <Container>
       <section className="flex flex-col gap-1">
         <section className="flex gap-1">
-          <section className="flex flex-1 items-center justify-center bg-black">
+          <section className="flex flex-1 items-center justify-center bg-black/20">
             <Stage width={1280} height={720} ref={sequenceRef}>
               <Layer>
                 <VideoSource
@@ -155,6 +155,7 @@ export default function VideoEditor() {
                 />
                 <Text text="Hello,world" fontSize={50} fill="white" shadowBlur={5} shadowColor="#fff" draggable />
                 <Star id="1" x={100} y={100} numPoints={5} fill="red" innerRadius={40} outerRadius={70} draggable />
+                <Rect x={0} y={0} width={1280} height={720} fill="black" />
               </Layer>
             </Stage>
           </section>
@@ -167,8 +168,17 @@ export default function VideoEditor() {
           <button>Pause</button>
           <button>Reset</button>
         </section>
-        <section className="h-[300px] bg-neutral-950">
-          <h3>타임라인</h3>
+        <section className="relative h-[300px] bg-neutral-950">
+          <div className="absolute left-0 top-0 h-full w-[2px] cursor-col-resize bg-red-500" style={{ left: '10%' }}></div>
+          <div className="flex justify-between">
+            <span>0s</span>
+            <span>60s</span>
+          </div>
+          <ul>
+            <li className="h-[30px] bg-neutral-800">
+              <div className="h-full bg-blue-500" style={{ width: '20%' }}></div>
+            </li>
+          </ul>
         </section>
       </section>
       <section className="mb-4 flex gap-2">
