@@ -1,34 +1,27 @@
 import { atom } from 'jotai';
 import { useImmerAtom } from 'jotai-immer';
 
+type ResourceType = 'video' | 'audio' | 'image' | 'text';
 interface TResource {
-  origin: {
-    path: string;
-    width: number;
-    height: number;
-    duration: number;
-    fps: number;
-  };
   id: string;
   name: string;
   path: string;
+  originPath: string;
+  type: ResourceType;
+}
+
+export interface VideoResource extends TResource {
   width: number;
   height: number;
   duration: number;
   fps: number;
-  startTime: number;
-  endTime: number;
-  display: 'show' | 'hidden';
-  type: 'video' | 'audio' | 'image' | 'text';
+  totalFrames: number;
+  displayAspectRatio: string;
+  bitRate: number;
+  type: 'video';
 }
 
 interface TEditorAtom {
-  input: {
-    fps: number;
-    width: number;
-    height: number;
-    duration: number;
-  };
   output: {
     fps: number;
     width: number;
@@ -37,22 +30,40 @@ interface TEditorAtom {
     outputFilename: string;
     outputDir: string;
   };
-  videoSources: TResource[];
+  resources: TResource[];
   layers: {
     id: string;
     name: string;
     resources: TResource[];
   }[];
 }
-
-export const editorAtom = atom<TEditorAtom | null>(null);
+const defaultValue: TEditorAtom = {
+  output: {
+    fps: 60,
+    width: 1280,
+    height: 720,
+    format: 'mp4',
+    outputFilename: 'output',
+    outputDir: ''
+  },
+  resources: [],
+  layers: []
+};
+export const editorAtom = atom<TEditorAtom>(defaultValue);
 
 /** immer */
 export function useEditorAtom() {
   const [state, setState] = useImmerAtom(editorAtom);
 
+  const appendResource = (resource: TResource) => {
+    setState((prev) => {
+      prev.resources.push(resource);
+    });
+  };
+
   return {
     state,
-    setState
+    setState,
+    appendResource
   };
 }

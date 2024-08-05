@@ -25,7 +25,7 @@ export type TVideoMetaData = {
   fps: number;
   width: number;
   height: number;
-  displayAspectRatio?: string;
+  displayAspectRatio: string;
   bitRate: number;
 };
 
@@ -152,7 +152,7 @@ export default function VideoSource({ path, width, height, controls, onChangeFra
         fps,
         width: Number(width),
         height: Number(height),
-        displayAspectRatio: display_aspect_ratio,
+        displayAspectRatio: display_aspect_ratio!,
         bitRate: Number(bit_rate)
       };
     }

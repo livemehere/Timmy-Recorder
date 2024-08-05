@@ -9,6 +9,7 @@ import { CreateBlankVideoParams, FrameToVideoArgs } from '../../../../typings/pr
 import useInvoke from '@renderer/src/hooks/useInvoke';
 import VideoSource, { TVideoControls, TVideoMetaData } from '@renderer/src/components/video-editor/VideoSource';
 import ProgressBar, { TProgressControls } from '@renderer/src/components/video-editor/ProgressBar';
+import Resources from '@renderer/src/components/video-editor/Resources';
 
 export default function VideoEditor() {
   const [currentFrameImageUrl, setCurrentFrameImageUrl] = useState('');
@@ -160,7 +161,7 @@ export default function VideoEditor() {
             </Stage>
           </section>
           <section className="w-[300px] bg-neutral-950">
-            <h2>리소스</h2>
+            <Resources />
           </section>
         </section>
         <section className="bg-neutral-950 p-2">
