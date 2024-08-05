@@ -11,7 +11,8 @@ type Props = {};
 export default function Resources({}: Props) {
   const {
     appendResource,
-    state: { resources }
+    appendResourceToLayer,
+    state: { resources, layers }
   } = useEditorAtom();
   const handleImportResource = async () => {
     const [path] = await window.app.invoke<string[], OpenDialogSyncOptions>('dialog:open', {
@@ -40,6 +41,7 @@ export default function Resources({}: Props) {
   const getVideoMetaData = async (path: string): Promise<TVideoMetaData | undefined> => {
     /** metadata 추출 */
     const metaData = await window.app.invoke<RVideoMetaData>('video-editor:getMetaData', path);
+    console.log(metaData);
     const videoStream = metaData.streams.find((s) => s.codec_type === 'video');
     if (videoStream) {
       const totalFrames = Number(videoStream.nb_frames) ?? 0;
@@ -69,7 +71,7 @@ export default function Resources({}: Props) {
       </h2>
       <ul className="flex flex-col gap-1">
         {resources.map((r) => (
-          <li key={r.id} className="bg-neutral-900 p-2 text-sm">
+          <li key={r.id} className="cursor-pointer bg-neutral-900 p-2 text-sm hover:bg-neutral-800" onClick={() => appendResourceToLayer(layers[0].id, r.id)}>
             {r.name}
           </li>
         ))}

@@ -10,6 +10,7 @@ import useInvoke from '@renderer/src/hooks/useInvoke';
 import VideoSource, { TVideoControls, TVideoMetaData } from '@renderer/src/components/video-editor/VideoSource';
 import ProgressBar, { TProgressControls } from '@renderer/src/components/video-editor/ProgressBar';
 import Resources from '@renderer/src/components/video-editor/Resources';
+import Timeline from '@renderer/src/components/video-editor/Timeline';
 
 export default function VideoEditor() {
   const [currentFrameImageUrl, setCurrentFrameImageUrl] = useState('');
@@ -169,17 +170,8 @@ export default function VideoEditor() {
           <button>Pause</button>
           <button>Reset</button>
         </section>
-        <section className="relative h-[300px] bg-neutral-950">
-          <div className="absolute left-0 top-0 h-full w-[2px] cursor-col-resize bg-red-500" style={{ left: '10%' }}></div>
-          <div className="flex justify-between">
-            <span>0s</span>
-            <span>60s</span>
-          </div>
-          <ul>
-            <li className="h-[30px] bg-neutral-800">
-              <div className="h-full bg-blue-500" style={{ width: '20%' }}></div>
-            </li>
-          </ul>
+        <section className="relative mb-8 h-[300px] bg-neutral-950">
+          <Timeline />
         </section>
       </section>
       <section className="mb-4 flex gap-2">
