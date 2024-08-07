@@ -19,6 +19,10 @@ const ExtractModal = ({ close, resolve, reject }: ExtractModalProps) => {
     videoEditorManager.outDir = outputPath;
   };
 
+  const handleRenderingStart = async () => {
+    await videoEditorManager.saveFrames();
+  };
+
   return (
     <div>
       <h2>영상을 추출합니다.</h2>
@@ -39,6 +43,7 @@ const ExtractModal = ({ close, resolve, reject }: ExtractModalProps) => {
           }}
         />
       </div>
+      <Button onClick={handleRenderingStart}>렌더링 시작</Button>
     </div>
   );
 };

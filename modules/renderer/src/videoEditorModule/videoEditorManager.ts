@@ -412,6 +412,13 @@ export class VideoEditorManager extends EventTarget {
     }
   }
 
+  async saveFrames() {
+    for (let i = this.outputRange[0]; i < this.outputRange[1]; i++) {
+      await this.drawFrame(i);
+      const dataUrl = this._renderer.getPNG();
+    }
+  }
+
   cleanUp() {
     this._timelineRenderer?.cleanUp();
   }

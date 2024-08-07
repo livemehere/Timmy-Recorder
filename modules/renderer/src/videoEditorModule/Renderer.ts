@@ -49,4 +49,8 @@ export class Renderer {
       this.ctx.drawImage(img, 0, 0, this.width, this.height);
     }
   }
+
+  getPNG() {
+    return this.canvas.toDataURL('image/png');
+  }
 }

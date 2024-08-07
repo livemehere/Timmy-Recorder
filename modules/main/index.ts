@@ -246,9 +246,10 @@ class Main {
     // video editor
     ipcMain.handle('video-editor:save-frame', async (_, data: { frame: number; imageBase64: string; outputName: string }) => {
       const { frame, imageBase64, outputName } = data;
-      dataPath.getPath('output'); // 없으면 만듬.
-      const dirPath = dataPath.getPath(`output/${outputName}`);
-      const filePath = path.resolve(dirPath, `frame-${frame}.png`);
+      const frameDirName = outputName; // 추출할 프레임 폴더 명
+      const frameOutDir = dataPath.getPath(`video-editor/result-frames/${frameDirName}`);
+
+      const filePath = path.resolve(frameOutDir, `frame-${frame}.png`);
       fs.writeFile(filePath, imageBase64, 'base64', (err) => {
         if (err) {
           console.log(`Error writing file: ${err} frame: ${frame}`);
@@ -263,7 +264,7 @@ class Main {
     ipcMain.handle('video-editor:frames-to-video', async (_, data: FrameToVideoArgs) => {
       const { outputName, outputPath, fps, width, height, format } = data;
       return convertImageFramesToVideo({
-        imagePath: path.resolve(dataPath.root, `output/${outputName}/frame-%d.png`),
+        imagePath: path.resolve(dataPath.root, `video-editor/result-frames/${outputName}/frame-%d.png`),
         outputPath: path.resolve(outputPath, `${outputName}.${format}`),
         fps,
         width,
