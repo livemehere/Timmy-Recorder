@@ -1,4 +1,6 @@
 import { NotificationConstructorOptions, OpenDialogSyncOptions } from 'electron';
+import { TVideoMetaData } from '@renderer/src/videoEditorModule/videoEditorManager';
+import { RVideoMetaData } from '../../../../typings/preload';
 
 /* OS 브라우저로 링크 열기 */
 export function openExternal(url: string) {
@@ -33,4 +35,26 @@ export function notificationRenderer(title: string, body: string): Promise<void>
       resolve();
     };
   });
+}
+
+export async function getVideoMetaData(path: string): Promise<TVideoMetaData | undefined> {
+  /** metadata 추출 */
+  const metaData = await window.app.invoke<RVideoMetaData>('video-editor:getMetaData', path);
+  const videoStream = metaData.streams.find((s) => s.codec_type === 'video');
+  if (videoStream) {
+    const totalFrames = Number(videoStream.nb_frames) ?? 0;
+    const duration = Number(videoStream.duration) ?? 0;
+    const avgFrameRate = videoStream.avg_frame_rate;
+    const fps = avgFrameRate ? +avgFrameRate.split('/')[0] : 0;
+    const { width, height, display_aspect_ratio, bit_rate } = videoStream;
+    return {
+      duration,
+      totalFrames,
+      fps,
+      width: Number(width),
+      height: Number(height),
+      displayAspectRatio: display_aspect_ratio!,
+      bitRate: Number(bit_rate)
+    };
+  }
 }

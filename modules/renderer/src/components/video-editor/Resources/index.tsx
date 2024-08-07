@@ -1,17 +1,11 @@
 import { LuImport } from 'react-icons/lu';
 import { OpenDialogSyncOptions } from 'electron';
+import { useEditorAtom } from '@renderer/src/store/editorAtom';
+import { videoEditorManager } from '@renderer/src/videoEditorModule/videoEditorManager';
 import { convertToMediaPath } from '@shared/path';
-import { RVideoMetaData } from '../../../../../../typings/preload';
-import { TVideoMetaData } from '@renderer/src/components/video-editor/VideoSource';
-import { useEditorAtom, VideoResource } from '@renderer/src/store/editorAtom';
-import { uid } from 'uid';
 
-type Props = {};
-
-export default function Resources({}: Props) {
+export default function Resources() {
   const {
-    appendResource,
-    appendResourceToLayer,
     state: { resources, layers }
   } = useEditorAtom();
   const handleImportResource = async () => {
@@ -20,45 +14,7 @@ export default function Resources({}: Props) {
       properties: ['openFile'],
       filters: [{ name: '비디오 파일', extensions: ['mp4'] }]
     });
-    const convertedPath = convertToMediaPath(path);
-    const metaData = await getVideoMetaData(path);
-    if (!metaData) {
-      alert('비디오 메타데이터를 가져올 수 없습니다.');
-      return;
-    }
-
-    const videoSource: VideoResource = {
-      id: uid(8),
-      path: convertedPath,
-      originPath: path,
-      type: 'video',
-      name: path.split('\\').pop() ?? '',
-      ...metaData
-    };
-    appendResource(videoSource);
-  };
-
-  const getVideoMetaData = async (path: string): Promise<TVideoMetaData | undefined> => {
-    /** metadata 추출 */
-    const metaData = await window.app.invoke<RVideoMetaData>('video-editor:getMetaData', path);
-    console.log(metaData);
-    const videoStream = metaData.streams.find((s) => s.codec_type === 'video');
-    if (videoStream) {
-      const totalFrames = Number(videoStream.nb_frames) ?? 0;
-      const duration = Number(videoStream.duration) ?? 0;
-      const avgFrameRate = videoStream.avg_frame_rate;
-      const fps = avgFrameRate ? +avgFrameRate.split('/')[0] : 0;
-      const { width, height, display_aspect_ratio, bit_rate } = videoStream;
-      return {
-        duration,
-        totalFrames,
-        fps,
-        width: Number(width),
-        height: Number(height),
-        displayAspectRatio: display_aspect_ratio!,
-        bitRate: Number(bit_rate)
-      };
-    }
+    videoEditorManager.addVideoResource(path);
   };
 
   return (
@@ -71,7 +27,8 @@ export default function Resources({}: Props) {
       </h2>
       <ul className="flex flex-col gap-1">
         {resources.map((r) => (
-          <li key={r.id} className="cursor-pointer bg-neutral-900 p-2 text-sm hover:bg-neutral-800" onClick={() => appendResourceToLayer(layers[0].id, r.id)}>
+          <li key={r.id} className="cursor-pointer bg-neutral-900 p-2 text-sm hover:bg-neutral-800" onClick={() => videoEditorManager.addResourceToLayer(layers[0].id, r.id)}>
+            <img src={convertToMediaPath(r.frames[0])} alt="" />
             {r.name}
           </li>
         ))}

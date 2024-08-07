@@ -19,7 +19,14 @@ export type OSN =
   | 'osn:getSettings'
   | 'osn:getPerformance'
   | 'osn:getThumbnail';
-export type VideoEdit = 'video-editor:create-sequence' | 'video-editor:save-frame' | 'video-editor:frames-to-video' | 'video-editor:getMetaData';
+export type VideoEdit =
+  | 'video-editor:getCachedResourceId'
+  | 'video-editor:getFramePaths'
+  | 'video-editor:extractFrames'
+  | 'video-editor:create-sequence'
+  | 'video-editor:save-frame'
+  | 'video-editor:frames-to-video'
+  | 'video-editor:getMetaData';
 export type TInvokeChannel = 'test' | 'dialog:open' | 'shell:openExternal' | 'shell:trashItem' | 'shell:openDir' | 'notification:show' | OSN | VideoEdit;
 export type TOnChannel = 'osn:signal';
 export type TPreloadAPI = {
@@ -56,3 +63,10 @@ export type CreateBlankVideoParams = {
   width: number;
   height: number;
 };
+
+export interface ExtractFramesOptions {
+  resourceId: string;
+  inputPath: string;
+  outDir: string;
+  fps: number;
+}

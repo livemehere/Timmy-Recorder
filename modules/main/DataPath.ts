@@ -10,7 +10,7 @@ class DataPath {
   getPath(dirname: string) {
     const path = join(this.root, dirname);
     if (!existsSync(path)) {
-      mkdirSync(path);
+      mkdirSync(path, { recursive: true });
     }
     return path;
   }

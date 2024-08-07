@@ -2,7 +2,7 @@ import ffmpegPath from 'ffmpeg-static';
 import ffprobe from 'ffprobe-static';
 
 import ffmpeg from 'fluent-ffmpeg';
-import { CreateBlankVideoParams } from '../../../typings/preload';
+import { CreateBlankVideoParams, ExtractFramesOptions } from '../../../typings/preload';
 import path from 'path';
 
 ffmpeg.setFfmpegPath(ffmpegPath!.replace('app.asar', 'app.asar.unpacked'));
@@ -96,6 +96,27 @@ export async function createBlankVideo({ outputPath, filename, fps, duration, wi
       })
       .on('end', () => {
         resolve(outputPath);
+      })
+      .on('error', (err) => {
+        reject(err);
+      })
+      .on('progress', (progress) => {
+        console.log(progress);
+      });
+  });
+}
+
+export async function extractFrames({ inputPath, outDir, fps }: ExtractFramesOptions) {
+  return new Promise<string>((resolve, reject) => {
+    ffmpeg()
+      .input(inputPath)
+      .outputOptions(['-vf', `fps=${fps}`])
+      .save(`${outDir}/frame-%d.png`)
+      .on('start', () => {
+        console.log('start');
+      })
+      .on('end', () => {
+        resolve(outDir);
       })
       .on('error', (err) => {
         reject(err);

@@ -9,11 +9,13 @@ import { isMac } from '@main/utils/byOS';
 import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
-import { convertImageFramesToVideo, createBlankVideo, getMetaData } from '@main/utils/ffmpeg';
-import { CreateBlankVideoParams, FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
+import { convertImageFramesToVideo, createBlankVideo, extractFrames, getMetaData } from '@main/utils/ffmpeg';
+import { CreateBlankVideoParams, ExtractFramesOptions, FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
 import { dataPath } from '@main/DataPath';
+import { videoEditorStorage } from '@main/VideoEditorStorage';
+import { getKeyByValue } from '@renderer/src/utils/fn';
 
 const IS_MAC = os.platform() === 'darwin';
 class Main {
@@ -271,6 +273,50 @@ class Main {
 
     ipcMain.handle('video-editor:getMetaData', async (_, filePath: string) => {
       return getMetaData(filePath);
+    });
+    ipcMain.handle('video-editor:getCachedResourceId', async (_, filePath: string) => {
+      const idMap = videoEditorStorage.get('resourceIdMap');
+      let hit: string | undefined;
+      if (idMap) {
+        hit = getKeyByValue(idMap, filePath);
+      }
+      return hit;
+    });
+
+    /**
+     * @description
+     * - 비디오 파일에서 프레임을 추출합니다.
+     * - 추출된 프레임은 'video-editor/extracted-frames/{id}/frame-%d.png' 위치에 저장됩니다.
+     * -
+     * */
+    ipcMain.handle('video-editor:extractFrames', async (_, options: ExtractFramesOptions) => {
+      const idMap = videoEditorStorage.get('resourceIdMap');
+      const hasCached = idMap && idMap[options.resourceId];
+      if (hasCached) {
+        return idMap[options.resourceId];
+      }
+      const outDir = await extractFrames({ ...options, outDir: dataPath.getPath(`video-editor/extracted-frames/${options.resourceId}`) });
+      if (!idMap) {
+        videoEditorStorage.set('resourceIdMap', { [options.resourceId]: options.inputPath });
+      } else {
+        idMap[options.resourceId] = options.inputPath;
+        videoEditorStorage.set('resourceIdMap', idMap);
+      }
+      return outDir;
+    });
+
+    ipcMain.handle('video-editor:getFramePaths', async (_, id: string) => {
+      return fs
+        .readdirSync(dataPath.getPath(`video-editor/extracted-frames/${id}`))
+        .sort((a, b) => {
+          const aNumber = parseInt(a.match(/(\d+)\.png$/)![1], 10);
+          const bNumber = parseInt(b.match(/(\d+)\.png$/)![1], 10);
+          return aNumber - bNumber;
+        })
+        .map((name) => {
+          // 파일 이름 패턴에 맞는 파일 필터링
+          return path.resolve(dataPath.getPath(`video-editor/extracted-frames/${id}`), name);
+        });
     });
   }
 }
