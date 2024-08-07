@@ -172,7 +172,8 @@ export class VideoEditorManager extends EventTarget {
 
   set timelinePreview(parent: HTMLDivElement) {
     this._timelineRenderer = new TimelineRenderer({
-      parent: parent
+      parent,
+      videoEditorManager: this
     });
   }
 
@@ -203,6 +204,10 @@ export class VideoEditorManager extends EventTarget {
     this.dispatchOutputEvent();
   }
 
+  get outputRange() {
+    return this._outputRange;
+  }
+
   public set outDir(v: string) {
     this._outDir = v;
     this.dispatchOutputEvent();
@@ -220,6 +225,10 @@ export class VideoEditorManager extends EventTarget {
   public set totalFrames(newTotalFrames: number) {
     this._totalFrames = newTotalFrames;
     this.dispatchOutputEvent();
+  }
+
+  get totalFrames() {
+    return this._totalFrames;
   }
 
   public set playSpeed(newSpeed: number) {

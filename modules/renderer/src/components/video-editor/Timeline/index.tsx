@@ -12,10 +12,13 @@ export default function Timeline() {
   const curFrameDisplay = useRef<HTMLDivElement>(null);
   const indicator = useRef<HTMLDivElement>(null);
   const timeline = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (timeline.current) {
-      videoEditorManager.timelinePreview = timeline.current;
-    }
+    setTimeout(() => {
+      if (timeline.current) {
+        videoEditorManager.timelinePreview = timeline.current;
+      }
+    }, 100);
   }, []);
 
   const setFrame = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -56,7 +59,6 @@ export default function Timeline() {
       {/*  <span>{output?.totalFrames}fps</span>*/}
       {/*</div>*/}
       <div
-        id="timeline"
         ref={timeline}
         style={{
           width: '100%',

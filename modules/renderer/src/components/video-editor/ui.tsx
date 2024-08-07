@@ -7,7 +7,7 @@ export default function VideoEditorUI({ children }: Props) {
 }
 
 function ViewAndResourceSection({ children }: Props) {
-  return <section className="flex gap-1">{children}</section>;
+  return <section className="flex h-[720px] gap-1 ">{children}</section>;
 }
 
 function ControlSection({ children }: Props) {
