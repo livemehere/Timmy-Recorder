@@ -47,6 +47,12 @@ export type FrameToVideoArgs = {
   format: 'mp4';
 };
 
+export interface SaveFrameArgs {
+  frame: number;
+  imageBase64: string;
+  outputName: string;
+}
+
 export type SetSettingArgs = {
   categoryEnumKey: TSettingCategoryEnumKey;
   parameter: string;

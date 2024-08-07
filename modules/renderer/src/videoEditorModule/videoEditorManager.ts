@@ -2,7 +2,7 @@ import { Renderer } from '@renderer/src/videoEditorModule/Renderer';
 import { convertToMediaPath } from '@shared/path';
 import { getVideoMetaData } from '@renderer/src/utils/preload';
 import { uid } from 'uid';
-import { ExtractFramesOptions, FrameToVideoArgs } from '../../../../typings/preload';
+import { ExtractFramesOptions, FrameToVideoArgs, SaveFrameArgs } from '../../../../typings/preload';
 import { TimelineRenderer } from '@renderer/src/videoEditorModule/TimelineRenderer';
 
 export type TVideoEditorState = 'play' | 'pause' | 'reset';
@@ -416,6 +416,11 @@ export class VideoEditorManager extends EventTarget {
     for (let i = this.outputRange[0]; i < this.outputRange[1]; i++) {
       await this.drawFrame(i);
       const dataUrl = this._renderer.getPNG();
+      await window.app.invoke<void, SaveFrameArgs>('video-editor:save-frame', {
+        frame: i,
+        outputName: this._outputFilename,
+        imageBase64: dataUrl.replace(/^data:image\/?[A-z]*;base64,/, '')
+      });
     }
   }
 

@@ -10,7 +10,7 @@ import { convertToMediaPath } from '@shared/path';
 import path from 'path';
 import * as fs from 'fs';
 import { convertImageFramesToVideo, createBlankVideo, extractFrames, getMetaData } from '@main/utils/ffmpeg';
-import { CreateBlankVideoParams, ExtractFramesOptions, FrameToVideoArgs, SetSettingArgs } from '../../typings/preload';
+import { CreateBlankVideoParams, ExtractFramesOptions, FrameToVideoArgs, SaveFrameArgs, SetSettingArgs } from '../../typings/preload';
 import { EOBSSettingsCategories, TSettingCategoryEnumKey } from '@main/utils/osn/obs_enums';
 import debugLog from '@shared/debugLog';
 import { dataPath } from '@main/DataPath';
@@ -244,7 +244,7 @@ class Main {
 
     // TODO: outputName 기반으로 'userData' 에 폴더 저장 하도록 구조 작업 필요
     // video editor
-    ipcMain.handle('video-editor:save-frame', async (_, data: { frame: number; imageBase64: string; outputName: string }) => {
+    ipcMain.handle('video-editor:save-frame', async (_, data: SaveFrameArgs) => {
       const { frame, imageBase64, outputName } = data;
       const frameDirName = outputName; // 추출할 프레임 폴더 명
       const frameOutDir = dataPath.getPath(`video-editor/result-frames/${frameDirName}`);
