@@ -1,7 +1,7 @@
 import { EventListener, TVideoEditorEventKey, TVideoEditorEventMap, videoEditorManager } from '@renderer/src/videoEditorModule/videoEditorManager';
 import { useEffect, useRef } from 'react';
 
-export default function useVideoEditorEvent<K extends TVideoEditorEventKey>(event: K, listener: EventListener<TVideoEditorEventMap, K>) {
+export default function useVideoEditorEvent<K extends TVideoEditorEventKey>(event: K, listener: EventListener<TVideoEditorEventMap, K>, deps: any[] = []) {
   const cb = useRef(listener);
   useEffect(() => {
     cb.current = listener;
@@ -12,5 +12,5 @@ export default function useVideoEditorEvent<K extends TVideoEditorEventKey>(even
     return () => {
       videoEditorManager.removeEventListener(event, cb.current);
     };
-  }, [event, cb]);
+  }, [event, cb, ...deps]);
 }

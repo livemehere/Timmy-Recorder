@@ -1,5 +1,4 @@
 import Container from '../components/ui/Container';
-import Button from '@renderer/src/components/ui/Button';
 import Resources from '@renderer/src/components/video-editor/Resources';
 import Timeline from '@renderer/src/components/video-editor/Timeline';
 import VideoEditorUI from '@renderer/src/components/video-editor/ui';
@@ -8,9 +7,13 @@ import useVideoEditorManagerBridge from '@renderer/src/videoEditorModule/usePlay
 import { videoEditorManager } from '@renderer/src/videoEditorModule/videoEditorManager';
 import { useEffect, useRef } from 'react';
 import { useEventListener } from 'usehooks-ts';
+import { useModal } from 'async-modal-react';
+import { Button } from '@nextui-org/react';
+import ExtractModal from '@renderer/src/components/modals/ExtractModal';
 
 export default function VideoEditor() {
   const previewRef = useRef<HTMLDivElement>(null);
+  const { pushModal } = useModal();
   useEffect(() => {
     if (previewRef.current) {
       console.log('set preview');
@@ -28,14 +31,6 @@ export default function VideoEditor() {
       videoEditorManager.playerState = videoEditorManager.playerState === 'play' ? 'pause' : 'play';
     }
   });
-
-  const handleSetupOutput = async () => {
-    const [outputPath] = await window.app.invoke('dialog:open', {
-      title: '저장위치 선택',
-      properties: ['openDirectory']
-    });
-    videoEditorManager.outDir = outputPath;
-  };
 
   return (
     <Container>
@@ -55,8 +50,13 @@ export default function VideoEditor() {
           <Timeline />
         </VideoEditorUI.TimelineSection>
       </VideoEditorUI>
-      <section className="mb-4 flex gap-2">
-        <Button onClick={handleSetupOutput}>저장위치 선택</Button>
+      <section>
+        <Button
+          onClick={async () => {
+            pushModal(ExtractModal);
+          }}>
+          추출
+        </Button>
       </section>
     </Container>
   );

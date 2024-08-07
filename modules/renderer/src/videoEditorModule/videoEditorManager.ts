@@ -5,11 +5,22 @@ import { uid } from 'uid';
 import { ExtractFramesOptions, FrameToVideoArgs } from '../../../../typings/preload';
 
 export type TVideoEditorState = 'play' | 'pause' | 'reset';
+export interface TOutputChange {
+  outDir: string;
+  outputFormat: string;
+  outputFilename: string;
+  outputWidth: number;
+  outputHeight: number;
+  duration: number;
+  fps: number;
+  totalFrames: number;
+}
 export interface TVideoEditorEventMap {
   playerStateChange: CustomEvent<{ state: TVideoEditorState }>;
   frameChange: CustomEvent<{ frame: number }>;
   resourceChange: CustomEvent<{ resources: Resource[] }>;
   layerChange: CustomEvent<{ layers: Layer[] }>;
+  outputChange: CustomEvent<TOutputChange>;
 }
 export type TVideoEditorEventKey = keyof TVideoEditorEventMap;
 export type EventListener<T, K extends keyof T> = (this: T, ev: T[K]) => void;
@@ -101,6 +112,7 @@ const DEFAULT_LAYER_RESOURCE: LayerResource = {
 };
 
 export class VideoEditorManager extends EventTarget {
+  isInit = false;
   private _playerState: TVideoEditorState = 'pause';
   private _curFrame = 0;
   private _totalFrames = DEFAULT_TOTAL_FRAMES;
@@ -115,11 +127,21 @@ export class VideoEditorManager extends EventTarget {
   private _outDir: string;
   private _outputFormat = 'mp4' as const;
   private _outputFilename: string;
+  private _outputWidth = 1280;
+  private _outputHeight = 720;
 
   constructor() {
     super();
     this.addLayer(structuredClone(DEFAULT_LAYER));
-    this._renderer.setSize(1280, 720);
+    this._renderer.setSize(this._outputWidth, this._outputHeight);
+  }
+
+  init() {
+    if (this.isInit) return;
+    this.dispatchEvent('layerChange', { layers: this._layers });
+    this.dispatchEvent('resourceChange', { resources: this._resources });
+    this.dispatchOutputEvent();
+    this.isInit = true;
   }
 
   // @ts-ignore
@@ -152,12 +174,27 @@ export class VideoEditorManager extends EventTarget {
     return this._curFrame;
   }
 
-  public set outDir(v: string) {
-    this._outDir = v;
+  private dispatchOutputEvent() {
+    this.dispatchEvent('outputChange', {
+      outDir: this._outDir,
+      outputFormat: this._outputFormat,
+      outputFilename: this._outputFilename,
+      outputWidth: this._outputWidth,
+      outputHeight: this._outputHeight,
+      duration: this._duration,
+      fps: this._fps,
+      totalFrames: this._totalFrames
+    });
   }
 
-  public setOutputFilename(v: string) {
+  public set outDir(v: string) {
+    this._outDir = v;
+    this.dispatchOutputEvent();
+  }
+
+  public set OutputFilename(v: string) {
     this._outputFilename = v;
+    this.dispatchOutputEvent();
   }
 
   public get playerState() {
@@ -166,6 +203,7 @@ export class VideoEditorManager extends EventTarget {
 
   public set totalFrames(newTotalFrames: number) {
     this._totalFrames = newTotalFrames;
+    this.dispatchOutputEvent();
   }
 
   public set playSpeed(newSpeed: number) {
@@ -175,11 +213,13 @@ export class VideoEditorManager extends EventTarget {
   public set fps(newFps: number) {
     this._fps = newFps;
     this._totalFrames = this._fps * this._duration;
+    this.dispatchOutputEvent();
   }
 
   public set duration(newDuration: number) {
     this._duration = newDuration;
     this._totalFrames = this._fps * this._duration;
+    this.dispatchOutputEvent();
   }
 
   public set curFrame(newFrame: number) {
@@ -323,6 +363,11 @@ export class VideoEditorManager extends EventTarget {
     this.dispatchEvent('layerChange', { layers: this._layers });
   }
 
+  /**
+   * - layer 별로 현재 프레임에 렌더링 되어야 하는 resource 를 캔버스에 그립니다.
+   * - 그릴 요소가 없다면 모두 지웁니다.
+   * - zIndex 값은 _layers 배열의 index 순서로 아래로 깔립니다. ex) 0 layer 는 가장 처음 그려지며, 1, 2 .. 번째 레이어에게 가려집니다.
+   **/
   async drawFrame(curFrame: number) {
     let hasShowFrame = false;
     this._layers.forEach((layer, index) => {
@@ -330,7 +375,6 @@ export class VideoEditorManager extends EventTarget {
         if (lr.startFrame <= curFrame) {
           const relativeFrameIdx = curFrame - lr.startFrame;
           const showFrame = lr.frames[relativeFrameIdx];
-          console.log(relativeFrameIdx, showFrame);
           if (showFrame) {
             hasShowFrame = true;
             this._renderer.drawImage(index, convertToMediaPath(showFrame));

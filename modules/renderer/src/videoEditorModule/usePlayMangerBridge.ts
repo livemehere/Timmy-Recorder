@@ -1,10 +1,19 @@
 import { useEffect } from 'react';
 import { TVideoEditorEventMap, videoEditorManager } from '@renderer/src/videoEditorModule/videoEditorManager';
 import { useEditorAtom } from '@renderer/src/store/editorAtom';
+import useVideoEditorEvent from '@renderer/src/videoEditorModule/useVideoEditorEvent';
 
 export default function useVideoEditorManagerBridge() {
   const { setState } = useEditorAtom();
+  useVideoEditorEvent('outputChange', (e) => {
+    const outputData = e.detail;
+    setState((draft) => {
+      draft.output = outputData;
+    });
+  });
+
   useEffect(() => {
+    videoEditorManager.init();
     const onPlayerStateChange = (e: TVideoEditorEventMap['playerStateChange']) => {
       setState((draft) => {
         draft.playerState = e.detail.state;
