@@ -170,9 +170,9 @@ export class VideoEditorManager extends EventTarget {
     this._renderer.preview = el;
   }
 
-  set timelineSelector(selector: string) {
+  set timelinePreview(parent: HTMLDivElement) {
     this._timelineRenderer = new TimelineRenderer({
-      parent: selector
+      parent: parent
     });
   }
 

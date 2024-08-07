@@ -1,7 +1,7 @@
 import Konva from 'konva';
 
 interface Options {
-  parent: string;
+  parent: HTMLDivElement;
 }
 export class TimelineRenderer {
   stage: Konva.Stage;
@@ -9,32 +9,30 @@ export class TimelineRenderer {
   width: number;
   height: number;
   private bgColor = 'rgb(10, 10, 10)';
-  parentSelector: string;
+  parent: HTMLDivElement;
 
   constructor(options: Options) {
-    this.parentSelector = options.parent;
-    const el = document.querySelector(this.parentSelector) as HTMLDivElement;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    this.width = rect.width;
-    this.height = rect.height;
+    this.parent = options.parent;
+    this.width = this.parent.offsetWidth;
+    this.height = this.parent.offsetHeight;
 
+    this.initCanvas();
+    this.setupBg();
+    this.resize();
+    window.addEventListener('resize', this.resize.bind(this));
+  }
+
+  initCanvas() {
     this.stage = new Konva.Stage({
-      container: el,
+      container: this.parent,
       width: this.width,
       height: this.height
     });
     this.stage.content.style.position = 'absolute';
     this.stage.content.style.top = '0';
     this.stage.content.style.left = '0';
-
     this.stage.add(this.rootLayer);
-    this.setupBg();
-    this.resize();
-    window.addEventListener('resize', this.resize.bind(this));
   }
-
-  initCanvas() {}
 
   setupBg() {
     const bg = new Konva.Rect({
@@ -48,15 +46,8 @@ export class TimelineRenderer {
   }
 
   resize() {
-    if (!this.stage) return;
-    const el = document.querySelector(this.parentSelector) as HTMLDivElement;
-    if (!el) return;
-    const newWidth = el.offsetWidth;
-    const newHeight = el.offsetHeight;
-    console.log(newWidth);
-
-    this.stage.content.style.width = `${newWidth}px`;
-    this.stage.content.style.height = `${newHeight}px`;
+    const newWidth = this.parent.offsetWidth;
+    const newHeight = this.parent.offsetHeight;
 
     this.stage.width(newWidth);
     this.stage.height(newHeight);

@@ -11,8 +11,11 @@ export default function Timeline() {
 
   const curFrameDisplay = useRef<HTMLDivElement>(null);
   const indicator = useRef<HTMLDivElement>(null);
+  const timeline = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    videoEditorManager.timelineSelector = '#timeline';
+    if (timeline.current) {
+      videoEditorManager.timelinePreview = timeline.current;
+    }
   }, []);
 
   const setFrame = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -54,6 +57,7 @@ export default function Timeline() {
       {/*</div>*/}
       <div
         id="timeline"
+        ref={timeline}
         style={{
           width: '100%',
           height: 300
