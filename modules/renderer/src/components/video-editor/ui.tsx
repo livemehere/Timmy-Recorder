@@ -3,7 +3,7 @@ type Props = {
 };
 
 export default function VideoEditorUI({ children }: Props) {
-  return <div className="flex flex-col gap-1">{children}</div>;
+  return <div className="flex max-w-[1920px] flex-col gap-1">{children}</div>;
 }
 
 function ViewAndResourceSection({ children }: Props) {
@@ -15,7 +15,7 @@ function ControlSection({ children }: Props) {
 }
 
 function TimelineSection({ children }: Props) {
-  return <section className="relative mb-8 h-[300px] bg-neutral-950">{children}</section>;
+  return <section className="relative mb-8">{children}</section>;
 }
 
 VideoEditorUI.ViewAndResourceSection = ViewAndResourceSection;

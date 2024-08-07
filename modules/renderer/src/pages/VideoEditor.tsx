@@ -36,7 +36,7 @@ export default function VideoEditor() {
     <Container>
       <VideoEditorUI>
         <VideoEditorUI.ViewAndResourceSection>
-          <section className="flex h-[720px] w-[1280px] flex-1 items-center justify-center bg-black/20">
+          <section className="flex flex-1 items-center justify-center bg-black/20">
             <div ref={previewRef} />
           </section>
           <section className="w-[300px] bg-neutral-950">

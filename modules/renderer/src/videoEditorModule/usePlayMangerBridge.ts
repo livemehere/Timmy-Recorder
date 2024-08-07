@@ -41,6 +41,7 @@ export default function useVideoEditorManagerBridge() {
       videoEditorManager.removeEventListener('playerStateChange', onPlayerStateChange);
       videoEditorManager.removeEventListener('resourceChange', onResourceChange);
       videoEditorManager.removeEventListener('layerChange', onLayerChange);
+      videoEditorManager.cleanUp();
     };
   }, []);
 }

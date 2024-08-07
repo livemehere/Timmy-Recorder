@@ -59,6 +59,7 @@
     "jotai": "^2.8.4",
     "jotai-devtools": "^0.10.0",
     "jotai-immer": "^0.4.1",
+    "konva": "^9.3.14",
     "obs-studio-node": "https://s3-us-west-2.amazonaws.com/obsstudionodes3.streamlabs.com/osn-0.15.6-release-win64.tar.gz",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

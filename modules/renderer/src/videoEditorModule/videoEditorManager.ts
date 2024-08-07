@@ -3,6 +3,7 @@ import { convertToMediaPath } from '@shared/path';
 import { getVideoMetaData } from '@renderer/src/utils/preload';
 import { uid } from 'uid';
 import { ExtractFramesOptions, FrameToVideoArgs } from '../../../../typings/preload';
+import { TimelineRenderer } from '@renderer/src/videoEditorModule/TimelineRenderer';
 
 export type TVideoEditorState = 'play' | 'pause' | 'reset';
 export interface TOutputChange {
@@ -14,6 +15,7 @@ export interface TOutputChange {
   duration: number;
   fps: number;
   totalFrames: number;
+  outputRange: [number, number];
 }
 export interface TVideoEditorEventMap {
   playerStateChange: CustomEvent<{ state: TVideoEditorState }>;
@@ -121,6 +123,7 @@ export class VideoEditorManager extends EventTarget {
   private _fps = DEFAULT_FPS;
   private _duration = DEFAULT_DURATION; // seconds
   private _renderer = new Renderer();
+  private _timelineRenderer: TimelineRenderer | null = null;
   private _layers: Layer[] = [];
   private _resources: Resource[] = [];
 
@@ -129,6 +132,7 @@ export class VideoEditorManager extends EventTarget {
   private _outputFilename: string;
   private _outputWidth = 1280;
   private _outputHeight = 720;
+  private _outputRange: [number, number] = [0, DEFAULT_TOTAL_FRAMES];
 
   constructor() {
     super();
@@ -166,6 +170,12 @@ export class VideoEditorManager extends EventTarget {
     this._renderer.preview = el;
   }
 
+  set timelineSelector(selector: string) {
+    this._timelineRenderer = new TimelineRenderer({
+      parent: selector
+    });
+  }
+
   get layers() {
     return this._layers;
   }
@@ -183,8 +193,14 @@ export class VideoEditorManager extends EventTarget {
       outputHeight: this._outputHeight,
       duration: this._duration,
       fps: this._fps,
-      totalFrames: this._totalFrames
+      totalFrames: this._totalFrames,
+      outputRange: this._outputRange
     });
+  }
+
+  public set outputRange(range: [number, number]) {
+    this._outputRange = range;
+    this.dispatchOutputEvent();
   }
 
   public set outDir(v: string) {
@@ -385,6 +401,10 @@ export class VideoEditorManager extends EventTarget {
     if (!hasShowFrame) {
       this._renderer.clear();
     }
+  }
+
+  cleanUp() {
+    this._timelineRenderer?.cleanUp();
   }
 }
 
