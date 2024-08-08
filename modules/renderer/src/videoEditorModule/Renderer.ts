@@ -5,6 +5,7 @@ export class Renderer {
   height = 720;
   previewEl: HTMLElement | null;
   cache: Record<string, HTMLImageElement> = {};
+  x = 0;
 
   setSize(width: number, height: number) {
     this.width = width;
@@ -47,6 +48,13 @@ export class Renderer {
     if (img) {
       this.clear();
       this.ctx.drawImage(img, 0, 0, this.width, this.height);
+
+      // 편집 요소들 추가하기
+      this.ctx.beginPath();
+      this.ctx.rect(this.x++, 10, 100, 100);
+      this.ctx.fillStyle = '#fff';
+      this.ctx.fill();
+      this.ctx.closePath();
     }
   }
 

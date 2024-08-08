@@ -53,7 +53,13 @@ export default function VideoEditor() {
       <section>
         <Button
           onClick={async () => {
-            pushModal(ExtractModal);
+            pushModal(
+              ExtractModal,
+              {},
+              {
+                onClickOutsideClose: false
+              }
+            );
           }}>
           추출
         </Button>

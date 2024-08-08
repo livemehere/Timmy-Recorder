@@ -20,9 +20,13 @@ const ExtractModal = ({ close, resolve, reject }: ExtractModalProps) => {
   };
 
   const handleRenderingStart = async () => {
-    await videoEditorManager.saveFrames();
-    const res = await videoEditorManager.generateVideo();
-    console.log(res);
+    try {
+      await videoEditorManager.saveFrames();
+      const res = await videoEditorManager.generateVideo();
+      resolve(res);
+    } catch (e) {
+      reject(e);
+    }
   };
 
   return (
